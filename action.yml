@@ -14,10 +14,10 @@ inputs:
     description: 'the name of the github repo'
     required: true
     default: authelia
-  image:
+  docker_image:
     description: address of the image
     required: true
-    default: authelia/chartrepo
+    default: authelia/authelia
   release:
     default: "authelia-0.8.55"
     required: true
