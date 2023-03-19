@@ -1,0 +1,45 @@
+name: "homelab updater"
+description: "small go tool to upate my homelab repo's dependencies"
+author: "loeken"
+inputs:
+  chart_name:
+    description: 'the name of the chart'
+    required: true
+    default: 'authelia'
+  github_user:
+    description: 'which github user owns the repo'
+    required: true
+    default: 'authelia'
+  github_repo:
+    description: 'the name of the github repo'
+    required: true
+    default: authelia
+  image:
+    description: address of the image
+    required: true
+    default: authelia/chartrepo
+  release:
+    default: "authelia-0.8.55"
+    required: true
+    description: "the version of the helm chart"
+  dockertag:
+    default: master
+    required: true
+    description: the docker tag
+  release_remove_string:
+    description: 'a string to be removed from the version'
+    required: true
+    default: 'authelia'
+  type:
+    description: jq syntax to extract last release
+    required: true
+    default: '.tag_name'
+  github_token:
+    description: the github token
+    required: true
+outputs:
+  myOutput:
+    description: "Output from the action"
+runs:
+  using: "docker"
+  image: "Dockerfile"
