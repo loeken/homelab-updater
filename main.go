@@ -170,7 +170,6 @@ func main() {
 	if err != nil {
 		fmt.Println("error: ", err)
 	}
-	fmt.Println(release, "<", tag)
 	if release < tag {
 		if releaseRemoveString != "" {
 			tag = strings.ReplaceAll(tag, releaseRemoveString, "")
