@@ -40,7 +40,7 @@ inputs:
   github_token:
     description: the github token
     required: true
-  self_manager_image:
+  self_managed_image:
     description: if image is managed by me
     required: true
     default: "false"
