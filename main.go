@@ -112,6 +112,7 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	parentSHA := ref.Object.GetSHA()
 	fmt.Println("filenmae path:")
 	fmt.Println(fileContent.GetPath())
+	fmt.Println(newBlob.SHA)
 	// Create a new tree object with the updated file
 	newTree, _, err := client.Git.CreateTree(ctx, owner, repo, parentSHA, []*github.TreeEntry{
 		{
