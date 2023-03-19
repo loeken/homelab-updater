@@ -59,8 +59,8 @@ jobs:
           sudo chmod +x /usr/local/bin/yq
           cd $GITHUB_WORKSPACE
 
-          echo "CHART_VERSION=$(cat values.yaml | yq -r '.${{ matrix.repo.chartName }}.chartVersion')"
-          echo "CHART_VERSION=$(cat values.yaml | yq -r '.${{ matrix.repo.chartName }}.chartVersion')" >> $GITHUB_ENV
+          echo "CHART_VERSION=$(cat values-${{ matrix.chartType }}.yaml | yq -r '.${{ matrix.repo.chartName }}.chartVersion')"
+          echo "CHART_VERSION=$(cat values-${{ matrix.chartType }}.yaml | yq -r '.${{ matrix.repo.chartName }}.chartVersion')" >> $GITHUB_ENV
  
 
 
