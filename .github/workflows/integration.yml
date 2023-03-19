@@ -1,0 +1,29 @@
+name: Integration Test
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@master
+
+      - name: Install yq
+        id: get_chart_version
+        run: |
+          sudo add-apt-repository ppa:rmescandon/yq
+          sudo apt update
+          sudo apt install -y yq
+          cd $GITHUB_WORKSPACE
+          echo "::set-output name=chart-version::$(cat values.yaml | yq -r '.authelia.chartVersion')"
+
+      - name: test for pending updates
+
+        # Put your action repo here
+        uses: loeken/homelab-updater@master
+        with:
+          github_user: authelia
+          github_repo: chartrepo
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_release: ${{ steps.get_chart_version.outputs.chart-version }}
+          chart_name: authelia
+          release_remove_string: authelia-
