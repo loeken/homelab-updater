@@ -24,6 +24,6 @@ jobs:
           github_user: authelia
           github_repo: chartrepo
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          github_release: ${{ steps.get_chart_version.outputs.chart-version }}
+          release: ${{ steps.get_chart_version.outputs.chart-version }}
           chart_name: authelia
           release_remove_string: authelia-
