@@ -10,7 +10,8 @@ jobs:
           - chartName: authelia
             github_user: authelia
             github_repo: chartrepo
-            image: authelia/authelia
+            images:
+              - authelia/authelia
             release: v4.37.5
             dockertag: master
             release_remove_string: authelia-
@@ -18,7 +19,8 @@ jobs:
           - chartName: cert-manager
             github_user: cert-manager
             github_repo: cert-manager
-            image: quay.io/jetstack/cert-manager-cainjector
+            images:
+              - quay.io/jetstack/cert-manager-cainjector
             release: v1.11.0
             dockertag: v1.11.0
             release_remove_string: ""
@@ -47,13 +49,8 @@ jobs:
           release_remove_string: ${{ matrix.repo.release_remove_string }}
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ matrix.repo.image }}:${{ matrix.repo.dockertag }}
-          ignore-unfixed: false
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
-          format: 'table'
-          #format: 'sarif'
-          output: 'trivy-results-${{ matrix.repo.github_repo }}.sarif'
-          timeout: 10m
+        run: |
+          for image in ${{ join(matrix.repo.images, ' ') }}; do
+            echo "Running trivy for $image"
+            docker run --rm aquasec/trivy --exit-code 1 --severity CRITICAL,HIGH,MEDIUM,LOW --format table $image:${{ matrix.repo.dockertag }}
+          done
