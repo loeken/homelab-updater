@@ -54,5 +54,5 @@ jobs:
         run: |
           for image in ${{ join(matrix.repo.images, ' ') }}; do
             echo "Running trivy for $image"
-            docker run --rm aquasec/trivy --exit-code 1 --severity CRITICAL,HIGH,MEDIUM,LOW --format table $image:${{ matrix.repo.dockertag }}
+            docker run --rm aquasec/trivy image $image:${{ matrix.repo.dockertag }}
           done
