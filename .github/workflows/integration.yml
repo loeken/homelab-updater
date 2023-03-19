@@ -10,11 +10,12 @@ jobs:
       - name: Install yq
         id: get_chart_version
         run: |
-          sudo add-apt-repository ppa:rmescandon/yq
-          sudo apt update
-          sudo apt install -y yq
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
           cd $GITHUB_WORKSPACE
+          echo cat values.yaml | yq -r '.authelia.chartVersion' > message.txt
           echo "::set-output name=chart-version::$(cat values.yaml | yq -r '.authelia.chartVersion')"
+          cat message.txt
 
       - name: test for pending updates
 
