@@ -184,6 +184,7 @@ func main() {
 		UpdateChartVersion(chartName, "loeken", "homelab-updater", "values-"+chartType+".yaml", chartName, "chartVersioN", tag, "main", token)
 
 		if selfManagedImage == "true" {
+			fmt.Println("self managed  Image: ", chartName, "loeken", "docker-"+chartName, ".github/workflows/release.yml", "env", "version", tag, "main", token)
 			UpdateChartVersion(chartName, "loeken", "docker-"+chartName, ".github/workflows/release.yml", "env", "version", tag, "main", token)
 		}
 		fmt.Println(chartName, " chart version updated")
