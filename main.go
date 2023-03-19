@@ -163,6 +163,7 @@ func main() {
 	token := os.Getenv("INPUT_GITHUB_TOKEN")
 	release := os.Getenv("INPUT_RELEASE")
 	chartName := os.Getenv("INPUT_CHART_NAME")
+	chartType := os.Getenv("INPUT_CHART_TYPE")
 	releaseRemoveString := os.Getenv("INPUT_RELEASE_REMOVE_STRING")
 
 	tag, err := getLatestReleaseTag(owner, repo, token)
@@ -177,8 +178,9 @@ func main() {
 		fmt.Println("token: ", token)
 		fmt.Println(release + "<" + tag)
 		fmt.Println("update required newer release found")
-		UpdateChartVersion(chartName, "loeken", "homelab", "deploy/argocd/bootstrap-optional-apps/values.yaml.example", tag, "main", token)
-		UpdateChartVersion(chartName, "loeken", "homelab-updater", "values.yaml", tag, "main", token)
+
+		UpdateChartVersion(chartName, "loeken", "homelab", "deploy/argocd/bootstrap-"+chartType+"-apps/values.yaml.example", tag, "main", token)
+		UpdateChartVersion(chartName, "loeken", "homelab-updater", "values-"+chartType+".yaml", tag, "main", token)
 
 		fmt.Println(chartName, " chart version updated")
 	}

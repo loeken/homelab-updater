@@ -8,6 +8,7 @@ jobs:
       matrix:
         repo:
           - chartName: authelia
+            chartType: optional
             github_user: authelia
             github_repo: chartrepo
             images:
@@ -16,7 +17,8 @@ jobs:
             dockertag: master
             release_remove_string: authelia-
 
-          - chartName: cert-manager
+          - chartName: certManager
+            chartType: core
             github_user: cert-manager
             github_repo: cert-manager
             images:
@@ -28,6 +30,7 @@ jobs:
             release_remove_string: ""
 
           - chartName: nginxingress
+            chartType: optional
             github_user: nginxinc
             github_repo: kubernetes-ingress
             images:
@@ -37,6 +40,7 @@ jobs:
             release_remove_string: ""
 
           - chartName: sealedSecrets
+            chartType: core
             github_user: bitnami-labs
             github_repo: sealed-secrets
             images:
@@ -54,7 +58,10 @@ jobs:
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
           cd $GITHUB_WORKSPACE
+
+          echo "CHART_VERSION=$(cat values.yaml | yq -r '.${{ matrix.repo.chartName }}.chartVersion')"
           echo "CHART_VERSION=$(cat values.yaml | yq -r '.${{ matrix.repo.chartName }}.chartVersion')" >> $GITHUB_ENV
+ 
 
 
       - name: debug

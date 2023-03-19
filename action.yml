@@ -6,6 +6,9 @@ inputs:
     description: 'the name of the chart'
     required: true
     default: 'authelia'
+  chart_type:
+    description: 'if this is optional/core chart'
+    required: true
   github_user:
     description: 'which github user owns the repo'
     required: true
