@@ -48,6 +48,14 @@ jobs:
             release: v0.19.5
             dockertag: v0.19.5
             release_remove_string: sealed-secrets-
+
+          - chartName: 
+            github_user: democratic-csi
+            github_repo: charts
+            image: loeken/democratic-csi
+            release: democratic-csi-0.13.5
+            dockertag: v1.7.7
+            type: releases/latest | jq ".tag_name"
     steps:
 
       - uses: actions/checkout@main
