@@ -72,8 +72,6 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 		return err
 	}
 
-	fmt.Println("contentBytes")
-	fmt.Println(string(contentBytes))
 	// Update the YAML value
 
 	// Convert contentBytes to a byte slice
@@ -95,9 +93,6 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 		fmt.Printf("error marshalling YAML: %v", err)
 		return err
 	}
-	fmt.Println("updatedContent")
-	fmt.Println(string(updatedContent))
-
 	// Create a new blob object for the updated content
 	newBlob, _, err := client.Git.CreateBlob(ctx, owner, repo, &github.Blob{
 		Content:  github.String(string(updatedContent)),
