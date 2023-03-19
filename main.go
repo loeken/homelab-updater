@@ -42,7 +42,7 @@ func getLatestReleaseTag(owner, repo, token string) (string, error) {
 	}
 
 	// Strip the "v" prefix from the tag name if it exists
-	return strings.TrimPrefix(release.TagName, "v"), nil
+	return release.TagName, nil
 }
 func UpdateChartVersion(chartName, owner, repo, filename, newVersion, branch, token string) error {
 
@@ -169,7 +169,7 @@ func main() {
 	if err != nil {
 		fmt.Println("error: ", err)
 	}
-
+	fmt.Println(release, "<", tag)
 	if release < tag {
 		if releaseRemoveString != "" {
 			tag = strings.ReplaceAll(tag, releaseRemoveString, "")

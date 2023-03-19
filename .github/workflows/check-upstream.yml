@@ -56,6 +56,10 @@ jobs:
           cd $GITHUB_WORKSPACE
           echo "CHART_VERSION=$(cat values.yaml | yq -r '.${{ matrix.repo.chartName }}.chartVersion')" >> $GITHUB_ENV
 
+
+      - name: debug
+        run: |
+          echo ${{ env.CHART_VERSION }}
       - name: test for pending updates
 
         # Put your action repo here
