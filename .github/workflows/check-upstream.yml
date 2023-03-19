@@ -3,6 +3,24 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        repo:
+          - chartName: authelia
+            github_user: authelia
+            github_repo: chartrepo
+            image: authelia/authelia
+            release: v4.37.5
+            dockertag: master
+            release_remove_string: authelia-
+
+          # - github_user: cert-manager
+          #   github_repo: cert-manager
+          #   image: quay.io/jetstack/cert-manager-cainjector
+          #   release: v1.11.0
+          #   dockertag: v1.11.0
+            
     steps:
 
       - uses: actions/checkout@main
@@ -13,18 +31,16 @@ jobs:
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
           cd $GITHUB_WORKSPACE
-          echo cat values.yaml | yq -r '.authelia.chartVersion' > message.txt
-          echo "::set-output name=chart-version::$(cat values.yaml | yq -r '.authelia.chartVersion')"
-          cat message.txt
+          echo "::set-output name=chart-version::$(cat values.yaml | yq -r '.${{ matrix.repo.chartName }}.chartVersion')"
 
       - name: test for pending updates
 
         # Put your action repo here
         uses: loeken/homelab-updater@main
         with:
-          github_user: authelia
-          github_repo: chartrepo
+          github_user: ${{ matrix.repo.github_user }}
+          github_repo: ${{ matrix.repo.github_repo }}
           github_token: ${{ secrets.UPDATE_TOKEN }}
           release: ${{ steps.get_chart_version.outputs.chart-version }}
-          chart_name: authelia
-          release_remove_string: authelia-
+          chart_name: ${{ matrix.repo.chartName }}
+          release_remove_string: ${{ matrix.repo.release_remove_string }}
