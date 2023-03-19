@@ -26,6 +26,15 @@ jobs:
             release: v1.11.0
             dockertag: v1.11.0
             release_remove_string: ""
+
+          - chartName: nginxingress
+            github_user: nginxinc
+            github_repo: kubernetes-ingress
+            images:
+              - nginx/nginx-ingress
+            release: v3.0.2
+            dockertag: edge-alpine
+            type: releases/latest | jq ".tag_name"
     steps:
 
       - uses: actions/checkout@main
