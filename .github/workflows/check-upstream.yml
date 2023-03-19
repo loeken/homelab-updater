@@ -102,6 +102,7 @@ jobs:
           chart_name: ${{ matrix.repo.chartName }}
           release_remove_string: ${{ matrix.repo.release_remove_string }}
           chart_type: ${{ matrix.repo.chartType }}
+          self_managed_image: ${{ matrix.repo.self_managed_image }}
 
       - name: Run Trivy vulnerability scanner
         run: |
