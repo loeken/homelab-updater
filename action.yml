@@ -23,7 +23,7 @@ inputs:
     required: true
     description: "the version of the helm chart"
   dockertag:
-    default: master
+    default: main
     required: true
     description: the docker tag
   release_remove_string:

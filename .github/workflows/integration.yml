@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - uses: actions/checkout@master
+      - uses: actions/checkout@main
 
       - name: Install yq
         id: get_chart_version
@@ -19,7 +19,7 @@ jobs:
       - name: test for pending updates
 
         # Put your action repo here
-        uses: loeken/homelab-updater@master
+        uses: loeken/homelab-updater@main
         with:
           github_user: authelia
           github_repo: chartrepo
