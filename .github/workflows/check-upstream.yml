@@ -36,7 +36,7 @@ jobs:
             dockertag: edge-alpine
             release_remove_string: ""
 
-          - chartName: sealed-secrets-controller
+          - chartName: sealedSecrets
             github_user: bitnami-labs
             github_repo: sealed-secrets
             images:
