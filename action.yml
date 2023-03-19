@@ -40,7 +40,10 @@ inputs:
   github_token:
     description: the github token
     required: true
-outputs:
+  self_manager_image:
+    description: if image is managed by me
+    required: true
+    default: "false"
   myOutput:
     description: "Output from the action"
 runs:

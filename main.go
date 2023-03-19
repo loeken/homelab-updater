@@ -44,7 +44,7 @@ func getLatestReleaseTag(owner, repo, token string) (string, error) {
 	// Strip the "v" prefix from the tag name if it exists
 	return release.TagName, nil
 }
-func UpdateChartVersion(chartName, owner, repo, filename, newVersion, branch, token string) error {
+func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock, newVersion, branch, token string) error {
 
 	ctx := context.Background()
 
@@ -83,7 +83,7 @@ func UpdateChartVersion(chartName, owner, repo, filename, newVersion, branch, to
 	}
 
 	// Update the chart version
-	values[chartName].(map[interface{}]interface{})["chartVersion"] = newVersion
+	values[parentBlock].(map[interface{}]interface{})[subBlock] = newVersion
 
 	// Marshal the updated values back to YAML
 	updatedContent, err := yaml.Marshal(values)
@@ -166,6 +166,8 @@ func main() {
 	chartType := os.Getenv("INPUT_CHART_TYPE")
 	releaseRemoveString := os.Getenv("INPUT_RELEASE_REMOVE_STRING")
 
+	selfManagedImage := os.Getenv("INPUT_SELF_MANAGED_IMAGE")
+
 	tag, err := getLatestReleaseTag(owner, repo, token)
 	if err != nil {
 		fmt.Println("error: ", err)
@@ -178,9 +180,12 @@ func main() {
 		fmt.Println(release + "<" + tag)
 		fmt.Println("update required newer release found")
 
-		UpdateChartVersion(chartName, "loeken", "homelab", "deploy/argocd/bootstrap-"+chartType+"-apps/values.yaml.example", tag, "main", token)
-		UpdateChartVersion(chartName, "loeken", "homelab-updater", "values-"+chartType+".yaml", tag, "main", token)
+		UpdateChartVersion(chartName, "loeken", "homelab", "deploy/argocd/bootstrap-"+chartType+"-apps/values.yaml.example", chartName, "chartVersioN", tag, "main", token)
+		UpdateChartVersion(chartName, "loeken", "homelab-updater", "values-"+chartType+".yaml", chartName, "chartVersioN", tag, "main", token)
 
+		if selfManagedImage == "true" {
+			UpdateChartVersion(chartName, "loeken", "docker-"+chartName, ".github/workflows/release.yml", "env", "version", tag, "main", token)
+		}
 		fmt.Println(chartName, " chart version updated")
 	}
 

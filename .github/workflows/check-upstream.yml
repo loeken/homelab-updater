@@ -56,7 +56,6 @@ jobs:
             image: loeken/democratic-csi
             release: democratic-csi-0.13.5
             dockertag: v1.7.7
-            type: releases/latest | jq ".tag_name"
 
           - chartName: democratic_nfs
             chartType: optional
@@ -65,7 +64,6 @@ jobs:
             image: loeken/democratic-csi
             release: democratic-csi-0.13.5
             dockertag: v1.7.7
-            type: releases/latest | jq ".tag_name"
 
           - chartName: ha
             chartType: optional
@@ -74,7 +72,7 @@ jobs:
             image: loeken/home-assistant
             release: 2023.3.3
             dockertag: 2023.3.3
-            type: releases/latest | jq ".tag_name"
+            self_managed_image: true
     steps:
 
       - uses: actions/checkout@main
