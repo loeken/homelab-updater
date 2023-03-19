@@ -62,14 +62,14 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	if err != nil {
 
 		fmt.Println("error getting file content:", err)
-		os.Exit(3)
+		return err
 	}
 
 	// Decode the file content from base64
 	contentBytes, err := fileContent.GetContent()
 	if err != nil {
 		fmt.Printf("error decoding file content: %v", err)
-		os.Exit(3)
+		return err
 	}
 
 	// Update the YAML value
@@ -81,7 +81,7 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	values := make(map[interface{}]interface{})
 	if err := yaml.Unmarshal(content, &values); err != nil {
 		fmt.Printf("error unmarshalling YAML: %v", err)
-		os.Exit(3)
+		return err
 	}
 
 	// Update the chart version
@@ -91,7 +91,7 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	updatedContent, err := yaml.Marshal(values)
 	if err != nil {
 		fmt.Printf("error marshalling YAML: %v", err)
-		os.Exit(3)
+		return err
 	}
 	// Create a new blob object for the updated content
 	newBlob, _, err := client.Git.CreateBlob(ctx, owner, repo, &github.Blob{
@@ -100,14 +100,14 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	})
 	if err != nil {
 		fmt.Printf("error creating blob: %v", err)
-		os.Exit(3)
+		return err
 	}
 
 	// Get the latest commit object for the branch
 	ref, _, err := client.Git.GetRef(ctx, owner, repo, fmt.Sprintf("refs/heads/%s", branch))
 	if err != nil {
 		fmt.Printf("error getting ref: %v", err)
-		os.Exit(3)
+		return err
 	}
 	parentSHA := ref.Object.GetSHA()
 
@@ -122,7 +122,7 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	})
 	if err != nil {
 		fmt.Printf("error creating tree: %v", err)
-		os.Exit(3)
+		return err
 	}
 
 	// Create a new commit object with the updated tree object
@@ -133,7 +133,7 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	})
 	if err != nil {
 		fmt.Printf("error creating commit: %v", err)
-		os.Exit(3)
+		return err
 	}
 
 	// Create a new reference for the updated commit
@@ -144,7 +144,7 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	})
 	if err != nil {
 		fmt.Printf("error creating reference: %v", err)
-		os.Exit(3)
+		return err
 	}
 
 	// Create a pull request with the changes
@@ -158,7 +158,7 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	})
 	if err != nil {
 		fmt.Printf("failed to create pull request: %v", err)
-		os.Exit(3)
+		return err
 	}
 
 	// Print the URL of the new pull request
@@ -189,12 +189,20 @@ func main() {
 		fmt.Println(release + "<" + tag)
 		fmt.Println("update required newer release found")
 
-		UpdateChartVersion(chartName, "loeken", "homelab", "deploy/argocd/bootstrap-"+chartType+"-apps/values.yaml.example", chartName, "chartVersioN", tag, "main", token)
+		err := UpdateChartVersion(chartName, "loeken", "homelab", "deploy/argocd/bootstrap-"+chartType+"-apps/values.yaml.example", chartName, "chartVersioN", tag, "main", token)
+		if err != nil {
+			fmt.Println("error encountered: ", err)
+		}
 		UpdateChartVersion(chartName, "loeken", "homelab-updater", "values-"+chartType+".yaml", chartName, "chartVersioN", tag, "main", token)
-
+		if err != nil {
+			fmt.Println("error encountered: ", err)
+		}
 		if selfManagedImage == "true" {
 			fmt.Println("self managed  Image: ", chartName, "loeken", "docker-"+chartName, ".github/workflows/release.yml", "env", "version", tag, "main", token)
 			UpdateChartVersion(chartName, "loeken", "docker-"+chartName, ".github/workflows/release.yml", "env", "version", tag, "main", token)
+			if err != nil {
+				fmt.Println("error encountered: ", err)
+			}
 			fmt.Println("finishied")
 		}
 		fmt.Println(chartName, " chart version updated")
