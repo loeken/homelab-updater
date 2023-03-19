@@ -120,6 +120,7 @@ nextcloud:
 nfsprovisioner:
   ip: 172.16.137.200
 nginxingress:
+  chartVersion: v3.0.2
   enabled: false
   linkerd: false
 nzbget:
