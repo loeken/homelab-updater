@@ -53,7 +53,8 @@ jobs:
             chartType: optional
             github_user: democratic-csi
             github_repo: charts
-            image: loeken/democratic-csi
+            images:
+              - loeken/democratic-csi
             release: democratic-csi-0.13.5
             dockertag: v1.7.7
 
@@ -61,7 +62,8 @@ jobs:
             chartType: optional
             github_user: democratic-csi
             github_repo: charts
-            image: loeken/democratic-csi
+            images:
+              - loeken/democratic-csi
             release: democratic-csi-0.13.5
             dockertag: v1.7.7
 
@@ -69,7 +71,8 @@ jobs:
             chartType: optional
             github_user: home-assistant
             github_repo: core
-            image: loeken/home-assistant
+            images:
+              -  loeken/home-assistant
             release: 2023.3.3
             dockertag: 2023.3.3
             self_managed_image: true
