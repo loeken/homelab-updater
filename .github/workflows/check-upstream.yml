@@ -39,10 +39,11 @@ jobs:
           - chartName: sealed-secrets-controller
             github_user: bitnami-labs
             github_repo: sealed-secrets
-            image: bitnami/sealed-secrets-controller
+            images:
+              - bitnami/sealed-secrets-controller
             release: v0.19.5
             dockertag: v0.19.5
-            release_remove_string: "sealed-secrets-"
+            release_remove_string: sealed-secrets-
     steps:
 
       - uses: actions/checkout@main
