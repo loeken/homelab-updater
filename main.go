@@ -44,7 +44,7 @@ func getLatestReleaseTag(owner, repo, token string) (string, error) {
 	// Strip the "v" prefix from the tag name if it exists
 	return release.TagName, nil
 }
-func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock, newVersion, branch, token string) error {
+func UpdateChartVersionWithPR(chartName, owner, repo, filename, parentBlock, subBlock, newVersion, branch, token string) error {
 
 	ctx := context.Background()
 
@@ -168,6 +168,100 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 
 	return nil
 }
+func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock, newVersion, branch, token string) error {
+
+	// create an authenticated github client
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
+	tc := oauth2.NewClient(ctx, ts)
+	client := github.NewClient(tc)
+
+	// Get the current contents of the file
+	fileContent, _, _, err := client.Repositories.GetContents(ctx, owner, repo, filename, &github.RepositoryContentGetOptions{
+		Ref: branch,
+	})
+	if err != nil {
+		return err
+	}
+
+	// Decode the file content from base64
+	contentBytes, err := fileContent.GetContent()
+	if err != nil {
+		return err
+	}
+
+	// Update the YAML value
+	// Convert contentBytes to a byte slice
+	content := []byte(contentBytes)
+
+	// Unmarshal the YAML content into a map
+	values := make(map[interface{}]interface{})
+	if err := yaml.Unmarshal(content, &values); err != nil {
+		return err
+	}
+
+	// Update the chart version
+	values[parentBlock].(map[interface{}]interface{})[subBlock] = newVersion
+
+	// Marshal the updated values back to YAML
+	updatedContent, err := yaml.Marshal(values)
+	if err != nil {
+		return err
+	}
+
+	// Create a new blob object for the updated content
+	newBlob, _, err := client.Git.CreateBlob(ctx, owner, repo, &github.Blob{
+		Content:  github.String(string(updatedContent)),
+		Encoding: github.String("utf-8"),
+	})
+	if err != nil {
+		return err
+	}
+
+	// Get the latest commit object for the branch
+	ref, _, err := client.Git.GetRef(ctx, owner, repo, fmt.Sprintf("refs/heads/%s", branch))
+	if err != nil {
+		return err
+	}
+	parentSHA := ref.Object.GetSHA()
+
+	// Create a new tree object with the updated file
+	newTree, _, err := client.Git.CreateTree(ctx, owner, repo, parentSHA, []*github.TreeEntry{
+		{
+			Path: github.String(fileContent.GetPath()),
+			Mode: github.String("100644"),
+			Type: github.String("blob"),
+			SHA:  newBlob.SHA,
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Create a new commit object with the updated tree object
+	newCommit, _, err := client.Git.CreateCommit(ctx, owner, repo, &github.Commit{
+		Message: github.String(fmt.Sprintf("Update %s to version %s", chartName, newVersion)),
+		Tree:    newTree,
+		Parents: []*github.Commit{{SHA: &parentSHA}},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Update the branch reference to the new commit
+	_, _, err = client.Git.UpdateRef(ctx, owner, repo, &github.Reference{
+		Ref: github.String(fmt.Sprintf("refs/heads/%s", branch)),
+		Object: &github.GitObject{
+			SHA: newCommit.SHA,
+		},
+	}, false)
+	if err != nil {
+		fmt.Printf("error updating reference: %v", err)
+		return err
+	}
+
+	return nil
+}
 func main() {
 	owner := os.Getenv("INPUT_GITHUB_USER")
 	repo := os.Getenv("INPUT_GITHUB_REPO")
@@ -191,11 +285,11 @@ func main() {
 		fmt.Println(release + "<" + tag)
 		fmt.Println("update required newer release found")
 
-		err := UpdateChartVersion(chartName, "loeken", "homelab", "deploy/argocd/bootstrap-"+chartType+"-apps/values.yaml.example", chartName, "chartVersioN", tag, "main", token)
+		err := UpdateChartVersionWithPR(chartName, "loeken", "homelab", "deploy/argocd/bootstrap-"+chartType+"-apps/values.yaml.example", chartName, "chartVersioN", tag, "main", token)
 		if err != nil {
 			fmt.Println("error encountered: ", err)
 		}
-		UpdateChartVersion(chartName, "loeken", "homelab-updater", "values-"+chartType+".yaml", chartName, "chartVersioN", tag, "main", token)
+		UpdateChartVersionWithPR(chartName, "loeken", "homelab-updater", "values-"+chartType+".yaml", chartName, "chartVersioN", tag, "main", token)
 		if err != nil {
 			fmt.Println("error encountered: ", err)
 		}
