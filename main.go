@@ -115,7 +115,8 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 		return err
 	}
 	parentSHA := ref.Object.GetSHA()
-
+	fmt.Println("filenmae path:")
+	fmt.Println(fileContent.GetPath())
 	// Create a new tree object with the updated file
 	newTree, _, err := client.Git.CreateTree(ctx, owner, repo, parentSHA, []*github.TreeEntry{
 		{
@@ -204,6 +205,7 @@ func main() {
 		}
 		if selfManagedImage == "true" {
 			fmt.Println("self managed  Image: ", chartName, "loeken", "docker-"+chartName, ".github/workflows/release.yml", "env", "version", tag, "main", token)
+
 			UpdateChartVersion(chartName, "loeken", "docker-"+chartName, ".github/workflows/release.yml", "env", "version", tag, "main", token)
 			if err != nil {
 				fmt.Println("error encountered: ", err)
