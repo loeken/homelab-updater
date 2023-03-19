@@ -202,7 +202,7 @@ func main() {
 		if selfManagedImage == "true" {
 			fmt.Println("self managed  Image: ", chartName, "loeken", "docker-"+chartName, ".github/workflows/release.yml", "env", "version", tag, "main", token)
 
-			UpdateChartVersion(chartName, "loeken", "docker-"+chartName, ".github/workflows/release.yml", "env", "version", tag, "main", token)
+			UpdateChartVersion(chartName, "loeken", "docker-"+chartName, "test.yaml", "env", "version", tag, "main", token)
 			if err != nil {
 				fmt.Println("error encountered: ", err)
 			}
