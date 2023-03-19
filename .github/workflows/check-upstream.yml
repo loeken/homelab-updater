@@ -50,11 +50,21 @@ jobs:
             release_remove_string: sealed-secrets-
 
           - chartName: democratic_iscsi
+            chartType: optional
             github_user: democratic-csi
             github_repo: charts
             image: loeken/democratic-csi
             release: democratic-csi-0.13.5
             dockertag: v1.7.7
+            type: releases/latest | jq ".tag_name"
+
+          - chartName: ha
+            chartType: optional
+            github_user: home-assistant
+            github_repo: core
+            image: loeken/home-assistant
+            release: 2023.3.3
+            dockertag: 2023.3.3
             type: releases/latest | jq ".tag_name"
     steps:
 
