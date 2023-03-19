@@ -20,7 +20,7 @@ func getLatestReleaseTag(owner, repo, token string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	// req.SetBasicAuth("loeken", token)
+	req.SetBasicAuth("loeken", token)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
