@@ -68,7 +68,8 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	// Decode the file content from base64
 	contentBytes, err := fileContent.GetContent()
 	if err != nil {
-		return fmt.Errorf("error decoding file content: %v", err)
+		fmt.Printf("error decoding file content: %v", err)
+		os.Exit(3)
 	}
 
 	// Update the YAML value
@@ -79,7 +80,8 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	// Unmarshal the YAML content into a map
 	values := make(map[interface{}]interface{})
 	if err := yaml.Unmarshal(content, &values); err != nil {
-		return fmt.Errorf("error unmarshalling YAML: %v", err)
+		fmt.Printf("error unmarshalling YAML: %v", err)
+		os.Exit(3)
 	}
 
 	// Update the chart version
@@ -88,7 +90,8 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	// Marshal the updated values back to YAML
 	updatedContent, err := yaml.Marshal(values)
 	if err != nil {
-		return fmt.Errorf("error marshalling YAML: %v", err)
+		fmt.Printf("error marshalling YAML: %v", err)
+		os.Exit(3)
 	}
 	// Create a new blob object for the updated content
 	newBlob, _, err := client.Git.CreateBlob(ctx, owner, repo, &github.Blob{
@@ -96,13 +99,15 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 		Encoding: github.String("utf-8"),
 	})
 	if err != nil {
-		return fmt.Errorf("error creating blob: %v", err)
+		fmt.Printf("error creating blob: %v", err)
+		os.Exit(3)
 	}
 
 	// Get the latest commit object for the branch
 	ref, _, err := client.Git.GetRef(ctx, owner, repo, fmt.Sprintf("refs/heads/%s", branch))
 	if err != nil {
-		return fmt.Errorf("error getting ref: %v", err)
+		fmt.Printf("error getting ref: %v", err)
+		os.Exit(3)
 	}
 	parentSHA := ref.Object.GetSHA()
 
@@ -116,7 +121,8 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("error creating tree: %v", err)
+		fmt.Printf("error creating tree: %v", err)
+		os.Exit(3)
 	}
 
 	// Create a new commit object with the updated tree object
@@ -126,7 +132,8 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 		Parents: []*github.Commit{{SHA: &parentSHA}},
 	})
 	if err != nil {
-		return fmt.Errorf("error creating commit: %v", err)
+		fmt.Printf("error creating commit: %v", err)
+		os.Exit(3)
 	}
 
 	// Create a new reference for the updated commit
@@ -136,7 +143,8 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 		Object: &github.GitObject{SHA: newCommit.SHA},
 	})
 	if err != nil {
-		return fmt.Errorf("error creating reference: %v", err)
+		fmt.Printf("error creating reference: %v", err)
+		os.Exit(3)
 	}
 
 	// Create a pull request with the changes
@@ -149,7 +157,8 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 		Base:  github.String(branch),
 	})
 	if err != nil {
-		return fmt.Errorf("failed to create pull request: %v", err)
+		fmt.Printf("failed to create pull request: %v", err)
+		os.Exit(3)
 	}
 
 	// Print the URL of the new pull request
