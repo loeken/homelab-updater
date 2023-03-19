@@ -49,7 +49,7 @@ jobs:
             dockertag: v0.19.5
             release_remove_string: sealed-secrets-
 
-          - chartName: 
+          - chartName: democratic_iscsi
             github_user: democratic-csi
             github_repo: charts
             image: loeken/democratic-csi
