@@ -44,3 +44,15 @@ jobs:
           release: ${{ steps.get_chart_version.outputs.chart-version }}
           chart_name: ${{ matrix.repo.chartName }}
           release_remove_string: ${{ matrix.repo.release_remove_string }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ matrix.repo.image }}:${{ matrix.repo.dockertag }}
+          ignore-unfixed: false
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+          # format: 'table'
+          format: 'sarif'
+          output: 'trivy-results-${{ matrix.repo.github_repo }}.sarif'
+          timeout: 10m
