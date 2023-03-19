@@ -15,12 +15,13 @@ jobs:
             dockertag: master
             release_remove_string: authelia-
 
-          # - github_user: cert-manager
-          #   github_repo: cert-manager
-          #   image: quay.io/jetstack/cert-manager-cainjector
-          #   release: v1.11.0
-          #   dockertag: v1.11.0
-            
+          - chartName: cert-manager
+            github_user: cert-manager
+            github_repo: cert-manager
+            image: quay.io/jetstack/cert-manager-cainjector
+            release: v1.11.0
+            dockertag: v1.11.0
+            release_remove_string: ""
     steps:
 
       - uses: actions/checkout@main
