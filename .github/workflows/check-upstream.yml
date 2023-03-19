@@ -34,7 +34,15 @@ jobs:
               - nginx/nginx-ingress
             release: v3.0.2
             dockertag: edge-alpine
-            type: releases/latest | jq ".tag_name"
+            release_remove_string: ""
+
+          - chartName: sealed-secrets-controller
+            github_user: bitnami-labs
+            github_repo: sealed-secrets
+            image: bitnami/sealed-secrets-controller
+            release: v0.19.5
+            dockertag: v0.19.5
+            release_remove_string: "sealed-secrets-"
     steps:
 
       - uses: actions/checkout@main
@@ -45,7 +53,7 @@ jobs:
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
           cd $GITHUB_WORKSPACE
-          echo "::set-output name=chart-version::$(cat values.yaml | yq -r '.${{ matrix.repo.chartName }}.chartVersion')"
+          echo "CHART_VERSION=$(cat values.yaml | yq -r '.${{ matrix.repo.chartName }}.chartVersion')" >> $GITHUB_ENV
 
       - name: test for pending updates
 
@@ -55,7 +63,7 @@ jobs:
           github_user: ${{ matrix.repo.github_user }}
           github_repo: ${{ matrix.repo.github_repo }}
           github_token: ${{ secrets.UPDATE_TOKEN }}
-          release: ${{ steps.get_chart_version.outputs.chart-version }}
+          release: ${{ env.CHART_VERSION }}
           chart_name: ${{ matrix.repo.chartName }}
           release_remove_string: ${{ matrix.repo.release_remove_string }}
 
