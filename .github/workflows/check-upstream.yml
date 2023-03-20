@@ -109,6 +109,8 @@ jobs:
           chart_type: ${{ matrix.repo.chartType }}
           self_managed_image: ${{ matrix.repo.self_managed_image }}
           docker_image: ${{ matrix.repo.docker_image }}
+          remote_chart_name: ${{ matrix.repo.remote_chart_name }}
+          self_managed_chart: ${{ matrix.repo.self_managed_chart }}
 
       - name: Run Trivy vulnerability scanner
         run: |
