@@ -75,8 +75,8 @@ jobs:
               -  loeken/home-assistant
             release: 2023.3.3
             dockertag: 2023.3.3
-            self_managed_image: true
-            self_managed_chart: true
+            self_managed_image: 'true'
+            self_managed_chart: 'true'
             remoteChartName: home-assistant
     steps:
 
