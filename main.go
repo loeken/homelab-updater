@@ -201,8 +201,12 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	}
 
 	// Update the chart version
-	values[parentBlock].(map[interface{}]interface{})[subBlock] = newVersion
-
+	if subBlock == "" {
+		values[parentBlock] = newVersion
+	}
+	if subBlock != "" {
+		values[parentBlock].(map[interface{}]interface{})[subBlock] = newVersion
+	}
 	// Marshal the updated values back to YAML
 	updatedContent, err := yaml.Marshal(values)
 	if err != nil {
@@ -268,10 +272,12 @@ func main() {
 	token := os.Getenv("INPUT_GITHUB_TOKEN")
 	release := os.Getenv("INPUT_RELEASE")
 	chartName := os.Getenv("INPUT_CHART_NAME")
+	remoteChartName := os.Getenv("INPUT_REMOTE_CHART_NAME")
 	chartType := os.Getenv("INPUT_CHART_TYPE")
 	releaseRemoveString := os.Getenv("INPUT_RELEASE_REMOVE_STRING")
 
 	selfManagedImage := os.Getenv("INPUT_SELF_MANAGED_IMAGE")
+	selfManagedChart := os.Getenv("INPUT_SELF_MANAGED_CHART")
 
 	tag, err := getLatestReleaseTag(owner, repo, token)
 	if err != nil {
@@ -302,6 +308,16 @@ func main() {
 			}
 			fmt.Println("finishied")
 		}
+		if selfManagedChart == "true" {
+			fmt.Println("self managed  Image: ", chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "version", "", tag, "main", token)
+
+			UpdateChartVersion(chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "version", "", tag, "main", token)
+			if err != nil {
+				fmt.Println("error encountered: ", err)
+			}
+			fmt.Println("finishied")
+		}
+
 		fmt.Println(chartName, " chart version updated")
 	}
 

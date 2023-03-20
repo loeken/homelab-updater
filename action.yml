@@ -6,6 +6,10 @@ inputs:
     description: 'the name of the chart'
     required: true
     default: 'authelia'
+  remote_chart_name:
+    description: 'the name of the chart in loeken/helm-charts'
+    required: true
+    default: 'false'
   chart_type:
     description: 'if this is optional/core chart'
     required: true
@@ -42,6 +46,10 @@ inputs:
     required: true
   self_managed_image:
     description: if image is managed by me
+    required: true
+    default: "false"
+  self_managed_chart:
+    description: if helm chart is managed by me
     required: true
     default: "false"
   myOutput:
