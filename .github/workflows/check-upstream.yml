@@ -77,7 +77,7 @@ jobs:
             dockertag: 2023.3.3
             self_managed_image: 'true'
             self_managed_chart: 'true'
-            remoteChartName: home-assistant
+            remote_chart_name: home-assistant
     steps:
 
       - uses: actions/checkout@main

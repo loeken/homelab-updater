@@ -309,7 +309,7 @@ func main() {
 			fmt.Println("finishied")
 		}
 		if selfManagedChart == "true" {
-			fmt.Println("self managed  Image: ", chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "version", "", tag, "main", token)
+			fmt.Println("self managed  chart: ", chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "version", "", tag, "main", token)
 
 			UpdateChartVersion(chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "version", "", tag, "main", token)
 			if err != nil {
