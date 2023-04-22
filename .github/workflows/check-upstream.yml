@@ -7,24 +7,27 @@ jobs:
       fail-fast: true
       matrix:
         repo:
-          - chartName: authelia
-            chartType: optional
-            github_user: authelia
-            github_repo: authelia
-            images:
-              - authelia/authelia
-            release_remove_string: authelia-
-            chart_index_url: https://charts.authelia.com/index.yaml
-
-          # - chartName: certManager
+          # - chartName: authelia
+          #   valuesChartName: authelia
           #   chartType: optional
-          #   github_user: cert-manager
-          #   github_repo: cert-manager
+          #   github_user: authelia
+          #   github_repo: authelia
           #   images:
-          #     - quay.io/jetstack/cert-manager-cainjector
-          #     - quay.io/jetstack/cert-manager-controller
-          #     - quay.io/jetstack/cert-manager-webhook
-          #   release_remove_string: ""
+          #     - authelia/authelia
+          #   release_remove_string: authelia-
+          #   chart_index_url: https://charts.authelia.com/index.yaml
+
+          - chartName: cert-manager
+            valuesChartName: certmanager
+            chartType: optional
+            github_user: cert-manager
+            github_repo: cert-manager
+            images:
+              - quay.io/jetstack/cert-manager-cainjector
+              - quay.io/jetstack/cert-manager-controller
+              - quay.io/jetstack/cert-manager-webhook
+            release_remove_string: ""
+            chart_index_url: https://charts.jetstack.io/index.yaml
 
           # - chartName: nginxingress
           #   chartType: optional
@@ -86,8 +89,8 @@ jobs:
           sudo chmod +x /usr/local/bin/yq
           cd $GITHUB_WORKSPACE
 
-          echo "CHART_VERSION=$(cat values-${{ matrix.repo.chartType }}.yaml | yq -r '.${{ matrix.repo.chartName }}.chartVersion')"
-          echo "CHART_VERSION=$(cat values-${{ matrix.repo.chartType }}.yaml | yq -r '.${{ matrix.repo.chartName }}.chartVersion')" >> $GITHUB_ENV
+          echo "CHART_VERSION=$(cat values-${{ matrix.repo.chartType }}.yaml | yq -r '.${{ matrix.repo.valuesChartName }}.chartVersion')"
+          echo "CHART_VERSION=$(cat values-${{ matrix.repo.chartType }}.yaml | yq -r '.${{ matrix.repo.valuesChartName }}.chartVersion')" >> $GITHUB_ENV
 
       - name: debug
         run: |
@@ -103,6 +106,7 @@ jobs:
           github_token: ${{ secrets.UPDATE_TOKEN }}
           chart_index_url: ${{ matrix.repo.chart_index_url }}
           chart_name: ${{ matrix.repo.chartName }}
+          values_chart_name: ${{ matrix.repo.valuesChartName }}
           chart_version: ${{ env.CHART_VERSION }}
           release_remove_string: ${{ matrix.repo.release_remove_string }}
           chart_type: ${{ matrix.repo.chartType }}

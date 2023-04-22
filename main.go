@@ -45,9 +45,14 @@ func getLatestChartVersion(chartIndexURL, chartName string) (string, error) {
 		return "", err
 	}
 
-	// Find the latest version of the specified chart
+	// Find the latest stable version of the specified chart
 	if versions, ok := index.Entries[chartName]; ok {
-		return versions[0].Version, nil
+		for _, version := range versions {
+			if !strings.Contains(version.Version, "alpha") && !strings.Contains(version.Version, "beta") {
+				return version.Version, nil
+			}
+		}
+		return "", fmt.Errorf("no stable version found for chart %s", chartName)
 	}
 
 	return "", fmt.Errorf("chart %s not found", chartName)
@@ -317,6 +322,7 @@ func main() {
 	chart_index_url := os.Getenv("INPUT_CHART_INDEX_URL")
 
 	chartName := os.Getenv("INPUT_CHART_NAME")
+	valuesChartName := os.Getenv("INPUT_VALUES_CHART_NAME")
 	oldChartVersion := os.Getenv("INPUT_CHART_VERSION")
 	// remoteChartName := os.Getenv("INPUT_REMOTE_CHART_NAME")
 	chartType := os.Getenv("INPUT_CHART_TYPE")
@@ -334,22 +340,21 @@ func main() {
 	if err != nil {
 		fmt.Println("error: ", err)
 	}
-	fmt.Println(oldChartVersion, "<", chart_version)
+	fmt.Println("chart:", chart_version)
+	fmt.Println("app:", app_version)
+
 	if oldChartVersion < chart_version {
-		// if releaseRemoveString != "" {
-		// 	tag = strings.ReplaceAll(tag, releaseRemoveString, "")
-		// }
-		fmt.Println("token: ", token)
+
 		fmt.Println("update required newer release found")
 
 		// update homelab
-		err := UpdateChartVersionWithPR(chartName, "loeken", "homelab", "deploy/argocd/bootstrap-"+chartType+"-apps/values.yaml.example", chartName, "chartVersion", chart_version, "main", token)
+		err := UpdateChartVersionWithPR(chartName, "loeken", "homelab", "deploy/argocd/bootstrap-"+chartType+"-apps/values.yaml.example", valuesChartName, "chartVersion", chart_version, "main", token)
 		if err != nil {
 			fmt.Println("error encountered: ", err)
 		}
 
 		// update values in this repo
-		UpdateChartVersionWithPR(chartName, "loeken", "homelab-updater", "values-"+chartType+".yaml", chartName, "chartVersion", chart_version, "main", token)
+		UpdateChartVersionWithPR(chartName, "loeken", "homelab-updater", "values-"+chartType+".yaml", valuesChartName, "chartVersion", chart_version, "main", token)
 		if err != nil {
 			fmt.Println("error encountered: ", err)
 		}

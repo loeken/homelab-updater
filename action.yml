@@ -6,6 +6,10 @@ inputs:
     description: 'the name of the chart'
     required: true
     default: 'authelia'
+  values_chart_name:
+    description: 'the name of the chart'
+    required: true
+    default: 'certmanager'
   remote_chart_name:
     description: 'the name of the chart in loeken/helm-charts'
     required: true
