@@ -54,6 +54,9 @@ inputs:
     default: "false"
   myOutput:
     description: "Output from the action"
+outputs:
+  release:
+    description: "released version of app"
 runs:
   using: "docker"
   image: "Dockerfile"

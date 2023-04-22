@@ -321,7 +321,5 @@ func main() {
 		fmt.Println(chartName, " chart version updated")
 	}
 
-	output := fmt.Sprintf("Hello %s", tag)
-
-	fmt.Printf(`::set-output name=myOutput::%s`, output)
+	fmt.Printf(`::set-output name=release::%s`, release)
 }

@@ -94,8 +94,8 @@ jobs:
         run: |
           echo ${{ env.CHART_VERSION }}
       - name: test for pending updates
-
         # Put your action repo here
+        id: test_updates
         uses: loeken/homelab-updater@main
         with:
           github_user: ${{ matrix.repo.github_user }}
@@ -109,7 +109,10 @@ jobs:
           docker_image: ${{ matrix.repo.docker_image }}
           remote_chart_name: ${{ matrix.repo.remote_chart_name }}
           self_managed_chart: ${{ matrix.repo.self_managed_chart }}
-
+      - name: Display release value
+        run: |
+          echo "Release value: ${{ steps.test_updates.outputs.release }}"
+          
       # - name: Run Trivy vulnerability scanner
       #   run: |
       #     for image in ${{ join(matrix.repo.images, ' ') }}; do
