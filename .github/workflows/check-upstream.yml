@@ -112,9 +112,14 @@ jobs:
         env:
           GITHUB_ENV: ${{ github.workspace }}/.env
 
+      - name: Read output file
+        id: read_output
+        run: |
+          echo "::set-output name=release::$(cat output.txt | grep RELEASE= | cut -d'=' -f2)"
+
       - name: Save release output
         run: |
-          echo "${{ steps.test_updates.outputs.stdout }}" >> $GITHUB_ENV
+          echo "${{ steps.read_output.outputs.release }}" >> $GITHUB_ENV
 
       - name: Display release value
         run: |

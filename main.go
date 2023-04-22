@@ -267,6 +267,8 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	return nil
 }
 func main() {
+	outputFile := "output.txt"
+
 	owner := os.Getenv("INPUT_GITHUB_USER")
 	repo := os.Getenv("INPUT_GITHUB_REPO")
 	token := os.Getenv("INPUT_GITHUB_TOKEN")
@@ -323,5 +325,14 @@ func main() {
 			fmt.Println(chartName, " chart version updated")
 		}
 	*/
-	fmt.Printf("RELEASE=%s\n", tag)
+	f, err := os.Create(outputFile)
+	if err != nil {
+		fmt.Println("error: ", err)
+	}
+	defer f.Close()
+
+	_, err = f.WriteString(fmt.Sprintf("RELEASE=%s\n", tag))
+	if err != nil {
+		fmt.Println("error: ", err)
+	}
 }
