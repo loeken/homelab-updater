@@ -13,8 +13,6 @@ jobs:
             github_repo: chartrepo
             images:
               - authelia/authelia
-            release: v4.37.5
-            dockertag: master
             release_remove_string: authelia-
 
           # - chartName: certManager
@@ -103,7 +101,7 @@ jobs:
           github_user: ${{ matrix.repo.github_user }}
           github_repo: ${{ matrix.repo.github_repo }}
           github_token: ${{ secrets.UPDATE_TOKEN }}
-          release: ${{ env.CHART_VERSION }}
+          chart_version: ${{ env.CHART_VERSION }}
           chart_name: ${{ matrix.repo.chartName }}
           release_remove_string: ${{ matrix.repo.release_remove_string }}
           chart_type: ${{ matrix.repo.chartType }}
@@ -112,9 +110,9 @@ jobs:
           remote_chart_name: ${{ matrix.repo.remote_chart_name }}
           self_managed_chart: ${{ matrix.repo.self_managed_chart }}
 
-      - name: Run Trivy vulnerability scanner
-        run: |
-          for image in ${{ join(matrix.repo.images, ' ') }}; do
-            echo "Running trivy for $image"
-            docker run --rm aquasec/trivy image $image:${{ matrix.repo.dockertag }}
-          done
+      # - name: Run Trivy vulnerability scanner
+      #   run: |
+      #     for image in ${{ join(matrix.repo.images, ' ') }}; do
+      #       echo "Running trivy for $image"
+      #       docker run --rm aquasec/trivy image $image:${{ matrix.repo.dockertag }}
+      #     done

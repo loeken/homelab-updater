@@ -25,7 +25,7 @@ inputs:
     description: address of the image
     required: true
     default: authelia/authelia
-  release:
+  chart_version:
     default: "authelia-0.8.55"
     required: true
     description: "the version of the helm chart"
