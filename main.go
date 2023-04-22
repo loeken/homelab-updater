@@ -49,7 +49,8 @@ func getLatestChartVersion(chartIndexURL, chartName string) (string, error) {
 	if versions, ok := index.Entries[chartName]; ok {
 		for _, version := range versions {
 			if !strings.Contains(version.Version, "alpha") && !strings.Contains(version.Version, "beta") {
-				return version.Version, nil
+				strippedTag := strings.TrimPrefix(version.Version, "v")
+				return strippedTag, nil
 			}
 		}
 		return "", fmt.Errorf("no stable version found for chart %s", chartName)
