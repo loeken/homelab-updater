@@ -1,4 +1,4 @@
 certManager:
-  chartVersion: v1.11.0
+  chartVersion: v1.11.1
 sealedSecrets:
   chartVersion: v0.19.5
