@@ -29,6 +29,10 @@ inputs:
     default: "authelia-0.8.55"
     required: true
     description: "the version of the helm chart"
+  app_version:
+    default: "4.37.5"
+    required: true
+    description: "the version of the application"
   dockertag:
     default: main
     required: true
