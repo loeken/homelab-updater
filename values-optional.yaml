@@ -129,6 +129,7 @@ nextcloud:
     username: nextcloud@example.com
   useAuthelia: false
 nfsprovisioner:
+  chartVersion: 4.0.18
   ip: 172.16.137.200
 nginxingress:
   chartVersion: 0.17.0
