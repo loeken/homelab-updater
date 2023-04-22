@@ -90,10 +90,6 @@ jobs:
           echo "CHART_VERSION=$(cat values-${{ matrix.repo.chartType }}.yaml | yq -r '.${{ matrix.repo.chartName }}.chartVersion')"
           echo "CHART_VERSION=$(cat values-${{ matrix.repo.chartType }}.yaml | yq -r '.${{ matrix.repo.chartName }}.chartVersion')" >> $GITHUB_ENV
 
-
-          echo "APP_VERSION=$(cat values-${{ matrix.repo.chartType }}.yaml | yq -r '.${{ matrix.repo.chartName }}.appVersion')"
-          echo "APP_VERSION=$(cat values-${{ matrix.repo.chartType }}.yaml | yq -r '.${{ matrix.repo.chartName }}.appVersion')" >> $GITHUB_ENV
-
       - name: debug
         run: |
           echo ${{ env.CHART_VERSION }}
@@ -107,7 +103,6 @@ jobs:
           github_token: ${{ secrets.UPDATE_TOKEN }}
           chart_version: ${{ env.CHART_VERSION }}
           chart_name: ${{ matrix.repo.chartName }}
-          app_version: ${{ env.APP_VERSION }}
           release_remove_string: ${{ matrix.repo.release_remove_string }}
           chart_type: ${{ matrix.repo.chartType }}
           self_managed_image: ${{ matrix.repo.self_managed_image }}

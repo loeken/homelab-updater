@@ -1,6 +1,5 @@
 ---
 authelia:
-  appVersion: 4.37.5
   chartVersion: 0.8.54
   enabled: false
   ingress:

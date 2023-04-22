@@ -272,55 +272,55 @@ func main() {
 	owner := os.Getenv("INPUT_GITHUB_USER")
 	repo := os.Getenv("INPUT_GITHUB_REPO")
 	token := os.Getenv("INPUT_GITHUB_TOKEN")
-	// chart_version := os.Getenv("INPUT_CHART_VERSION")
-	app_version := os.Getenv("INPUT_APP_VERSION")
+	chart_version := os.Getenv("INPUT_CHART_VERSION")
+
 	chartName := os.Getenv("INPUT_CHART_NAME")
-	// remoteChartName := os.Getenv("INPUT_REMOTE_CHART_NAME")
-	// chartType := os.Getenv("INPUT_CHART_TYPE")
+	remoteChartName := os.Getenv("INPUT_REMOTE_CHART_NAME")
+	chartType := os.Getenv("INPUT_CHART_TYPE")
 	releaseRemoveString := os.Getenv("INPUT_RELEASE_REMOVE_STRING")
 
-	// selfManagedImage := os.Getenv("INPUT_SELF_MANAGED_IMAGE")
-	// selfManagedChart := os.Getenv("INPUT_SELF_MANAGED_CHART")
+	selfManagedImage := os.Getenv("INPUT_SELF_MANAGED_IMAGE")
+	selfManagedChart := os.Getenv("INPUT_SELF_MANAGED_CHART")
 
 	tag, err := getLatestReleaseTag(owner, repo, token)
 	if err != nil {
 		fmt.Println("error: ", err)
 	}
 
-	if app_version < tag {
+	if chart_version < tag {
 		if releaseRemoveString != "" {
 			tag = strings.ReplaceAll(tag, releaseRemoveString, "")
 		}
 		fmt.Println("token: ", token)
-		fmt.Println(app_version + "<" + tag)
+		fmt.Println(chart_version + "<" + tag)
 		fmt.Println("update required newer release found")
 
-		// err := UpdateChartVersionWithPR(chartName, "loeken", "homelab", "deploy/argocd/bootstrap-"+chartType+"-apps/values.yaml.example", chartName, "chartVersion", tag, "main", token)
-		// if err != nil {
-		// 	fmt.Println("error encountered: ", err)
-		// }
-		// UpdateChartVersionWithPR(chartName, "loeken", "homelab-updater", "values-"+chartType+".yaml", chartName, "chartVersion", tag, "main", token)
-		// if err != nil {
-		// 	fmt.Println("error encountered: ", err)
-		// }
-		// if selfManagedImage == "true" {
-		// 	fmt.Println("self managed  Image: ", chartName, "loeken", "docker-"+chartName, ".github/workflows/release.yml", "env", "version", tag, "main", token)
+		err := UpdateChartVersionWithPR(chartName, "loeken", "homelab", "deploy/argocd/bootstrap-"+chartType+"-apps/values.yaml.example", chartName, "chartVersion", tag, "main", token)
+		if err != nil {
+			fmt.Println("error encountered: ", err)
+		}
+		UpdateChartVersionWithPR(chartName, "loeken", "homelab-updater", "values-"+chartType+".yaml", chartName, "chartVersion", tag, "main", token)
+		if err != nil {
+			fmt.Println("error encountered: ", err)
+		}
+		if selfManagedImage == "true" {
+			fmt.Println("self managed  Image: ", chartName, "loeken", "docker-"+chartName, ".github/workflows/release.yml", "env", "version", tag, "main", token)
 
-		// 	UpdateChartVersion(chartName, "loeken", "docker-"+chartName, "version.yaml", chartName, "env", "version", tag, "main", token)
-		// 	if err != nil {
-		// 		fmt.Println("error encountered: ", err)
-		// 	}
-		// 	fmt.Println("finishied")
-		// }
-		// if selfManagedChart == "true" {
-		// 	fmt.Println("self managed  chart: ", chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "version", "", tag, "main", token)
+			UpdateChartVersion(chartName, "loeken", "docker-"+chartName, "version.yaml", chartName, "env", "version", tag, "main", token)
+			if err != nil {
+				fmt.Println("error encountered: ", err)
+			}
+			fmt.Println("finishied")
+		}
+		if selfManagedChart == "true" {
+			fmt.Println("self managed  chart: ", chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "version", "", tag, "main", token)
 
-		// 	UpdateChartVersion(chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "version", "", release, tag, "main", token)
-		// 	if err != nil {
-		// 		fmt.Println("error encountered: ", err)
-		// 	}
-		// 	fmt.Println("finishied")
-		// }
+			UpdateChartVersion(chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", chartName, "version", "", tag, "main", token)
+			if err != nil {
+				fmt.Println("error encountered: ", err)
+			}
+			fmt.Println("finishied")
+		}
 
 		fmt.Println(chartName, " chart version updated")
 	}
