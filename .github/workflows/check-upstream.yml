@@ -17,67 +17,67 @@ jobs:
             dockertag: master
             release_remove_string: authelia-
 
-          - chartName: certManager
-            chartType: core
-            github_user: cert-manager
-            github_repo: cert-manager
-            images:
-              - quay.io/jetstack/cert-manager-cainjector
-              - quay.io/jetstack/cert-manager-controller
-              - quay.io/jetstack/cert-manager-webhook
-            release: v1.11.0
-            dockertag: v1.11.0
-            release_remove_string: ""
+          # - chartName: certManager
+          #   chartType: core
+          #   github_user: cert-manager
+          #   github_repo: cert-manager
+          #   images:
+          #     - quay.io/jetstack/cert-manager-cainjector
+          #     - quay.io/jetstack/cert-manager-controller
+          #     - quay.io/jetstack/cert-manager-webhook
+          #   release: v1.11.0
+          #   dockertag: v1.11.0
+          #   release_remove_string: ""
 
-          - chartName: nginxingress
-            chartType: optional
-            github_user: nginxinc
-            github_repo: kubernetes-ingress
-            images:
-              - nginx/nginx-ingress
-            release: v3.0.2
-            dockertag: edge-alpine
-            release_remove_string: ""
+          # - chartName: nginxingress
+          #   chartType: optional
+          #   github_user: nginxinc
+          #   github_repo: kubernetes-ingress
+          #   images:
+          #     - nginx/nginx-ingress
+          #   release: v3.0.2
+          #   dockertag: edge-alpine
+          #   release_remove_string: ""
 
-          - chartName: sealedSecrets
-            chartType: core
-            github_user: bitnami-labs
-            github_repo: sealed-secrets
-            images:
-              - bitnami/sealed-secrets-controller
-            release: v0.19.5
-            dockertag: v0.19.5
-            release_remove_string: sealed-secrets-
+          # - chartName: sealedSecrets
+          #   chartType: core
+          #   github_user: bitnami-labs
+          #   github_repo: sealed-secrets
+          #   images:
+          #     - bitnami/sealed-secrets-controller
+          #   release: v0.19.5
+          #   dockertag: v0.19.5
+          #   release_remove_string: sealed-secrets-
 
-          - chartName: democratic_iscsi
-            chartType: optional
-            github_user: democratic-csi
-            github_repo: charts
-            images:
-              - loeken/democratic-csi
-            release: democratic-csi-0.13.5
-            dockertag: v1.7.7
+          # - chartName: democratic_iscsi
+          #   chartType: optional
+          #   github_user: democratic-csi
+          #   github_repo: charts
+          #   images:
+          #     - loeken/democratic-csi
+          #   release: democratic-csi-0.13.5
+          #   dockertag: v1.7.7
 
-          - chartName: democratic_nfs
-            chartType: optional
-            github_user: democratic-csi
-            github_repo: charts
-            images:
-              - loeken/democratic-csi
-            release: democratic-csi-0.13.5
-            dockertag: v1.7.7
+          # - chartName: democratic_nfs
+          #   chartType: optional
+          #   github_user: democratic-csi
+          #   github_repo: charts
+          #   images:
+          #     - loeken/democratic-csi
+          #   release: democratic-csi-0.13.5
+          #   dockertag: v1.7.7
 
-          - chartName: ha
-            chartType: optional
-            github_user: home-assistant
-            github_repo: core
-            images:
-              -  loeken/home-assistant
-            release: 2023.3.3
-            dockertag: 2023.3.3
-            self_managed_image: 'true'
-            self_managed_chart: 'true'
-            remote_chart_name: home-assistant
+          # - chartName: ha
+          #   chartType: optional
+          #   github_user: home-assistant
+          #   github_repo: core
+          #   images:
+          #     -  loeken/home-assistant
+          #   release: 2023.3.3
+          #   dockertag: 2023.3.3
+          #   self_managed_image: 'true'
+          #   self_managed_chart: 'true'
+          #   remote_chart_name: home-assistant
     steps:
 
       - uses: actions/checkout@main

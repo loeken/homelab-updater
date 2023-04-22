@@ -1,3 +1,4 @@
+---
 authelia:
   chartVersion: 0.8.54
   enabled: false
@@ -17,6 +18,8 @@ ceph:
 cloudflaretunnel:
   enabled: true
 clusterIssuer: letsencrypt-staging
+certmanager:
+  enabled: false
 democratic_iscsi:
   chartVersion: 0.13.5
   enabled: false
@@ -64,6 +67,9 @@ jellyseerr:
   linkerd: false
   useAuthelia: false
 k10:
+  enabled: false
+  storageClass: local-path
+kubeflow:
   enabled: false
   storageClass: local-path
 linkerd:
@@ -174,8 +180,6 @@ rtorrentflood:
   size: 10Gi
   storageClass: local-path
   useAuthelia: false
-sealedSecrets:
-  chartVersion: v0.19.5
 sharedmedia:
   size: 1000Gi
   storageClass: local-path
@@ -195,6 +199,11 @@ vaultwarden:
   enabled: false
   storageClass: local-path
   useAuthelia: true
+  ingress:
+    cloudflaretunnel:
+      enabled: true
+    nginx:
+      enabled: false
 volumesnapshots:
   enabled: true
 whoami:
