@@ -17,67 +17,129 @@ jobs:
           #   release_remove_string: authelia-
           #   chart_index_url: https://charts.authelia.com/index.yaml
 
-          - chartName: cert-manager
-            valuesChartName: certmanager
-            chartType: optional
-            github_user: cert-manager
-            github_repo: cert-manager
-            images:
-              - quay.io/jetstack/cert-manager-cainjector
-              - quay.io/jetstack/cert-manager-controller
-              - quay.io/jetstack/cert-manager-webhook
-            release_remove_string: ""
-            chart_index_url: https://charts.jetstack.io/index.yaml
+          # - chartName: cert-manager
+          #   valuesChartName: certmanager
+          #   chartType: optional
+          #   github_user: cert-manager
+          #   github_repo: cert-manager
+          #   images:
+          #     - quay.io/jetstack/cert-manager-cainjector
+          #     - quay.io/jetstack/cert-manager-controller
+          #     - quay.io/jetstack/cert-manager-webhook
+          #   release_remove_string: ""
+          #   chart_index_url: https://charts.jetstack.io/index.yaml
 
-          # - chartName: nginxingress
+          # - chartName: nginx-ingress
+          #   valuesChartName: nginxingress
           #   chartType: optional
           #   github_user: nginxinc
           #   github_repo: kubernetes-ingress
           #   images:
           #     - nginx/nginx-ingress
-          #   release: v3.0.2
-          #   dockertag: edge-alpine
           #   release_remove_string: ""
+          #   chart_index_url: https://helm.nginx.com/stable/index.yaml
 
-          # - chartName: sealedSecrets
+          # - chartName: sealed-secrets
+          #   valuesChartName: sealedsecrets
           #   chartType: core
           #   github_user: bitnami-labs
           #   github_repo: sealed-secrets
           #   images:
           #     - bitnami/sealed-secrets-controller
-          #   release: v0.19.5
-          #   dockertag: v0.19.5
           #   release_remove_string: sealed-secrets-
+          #   chart_index_url: https://bitnami-labs.github.io/sealed-secrets/index.yaml
 
-          # - chartName: democratic_iscsi
+          # - chartName: democratic-csi
+          #   valuesChartName: democratic_iscsi
           #   chartType: optional
           #   github_user: democratic-csi
-          #   github_repo: charts
+          #   github_repo: democratic-csi
           #   images:
           #     - loeken/democratic-csi
-          #   release: democratic-csi-0.13.5
-          #   dockertag: v1.7.7
+          #   release_remove_string: democratic-csi-
+          #   chart_index_url: https://democratic-csi.github.io/charts/index.yaml
 
-          # - chartName: democratic_nfs
+          # - chartName: democratic-csi
+          #   valuesChartName: democratic_nfs
           #   chartType: optional
           #   github_user: democratic-csi
-          #   github_repo: charts
+          #   github_repo: democratic-csi
           #   images:
           #     - loeken/democratic-csi
-          #   release: democratic-csi-0.13.5
-          #   dockertag: v1.7.7
+          #   release_remove_string: democratic-csi-
+          #   chart_index_url: https://democratic-csi.github.io/charts/index.yaml
 
-          # - chartName: ha
+          # - chartName: home-assistant
           #   chartType: optional
+          #   valuesChartName: ha
           #   github_user: home-assistant
           #   github_repo: core
           #   images:
           #     -  loeken/home-assistant
-          #   release: 2023.3.3
-          #   dockertag: 2023.3.3
           #   self_managed_image: 'true'
           #   self_managed_chart: 'true'
           #   remote_chart_name: home-assistant
+          #   chart_index_url: https://loeken.github.io/helm-charts/index.yaml
+
+          # - chartName: external-dns
+          #   chartType: optional
+          #   valuesChartName: externaldns
+          #   github_user: kubernetes-sigs
+          #   github_repo: external-dns
+          #   images:
+          #     -  bitnami/external-dns
+          #   chart_index_url: https://charts.bitnami.com/bitnami/index.yaml
+
+          # - chartName: jellyfin
+          #   chartType: optional
+          #   valuesChartName: jellyfin
+          #   github_user: jellyfin
+          #   github_repo: jellyfin
+          #   self_managed_image: 'true'
+          #   self_managed_chart: 'true'
+          #   images:
+          #     -  loeken/jellyfin
+          #   chart_index_url: https://loeken.github.io/helm-charts/index.yaml
+
+          # - chartName: jellyseerr
+          #   chartType: optional
+          #   valuesChartName: jellyseerr
+          #   github_user: Fallenbagel
+          #   github_repo: jellyseerr
+          #   self_managed_image: 'true'
+          #   self_managed_chart: 'true'
+          #   images:
+          #     -  loeken/jellyseerr
+          #   chart_index_url: https://loeken.github.io/helm-charts/index.yaml
+
+          # - chartName: k10
+          #   chartType: optional
+          #   valuesChartName: k10
+          #   github_user: kasten-io
+          #   github_repo: k10
+          #   self_managed_image: 'true'
+          #   self_managed_chart: 'true'
+          #   images:
+          #     -  loeken/jellyseerr
+          #   chart_index_url: https://charts.kasten.io/index.yaml
+
+          # - chartName: loki
+          #   chartType: optional
+          #   valuesChartName: loki
+          #   github_user: grafana
+          #   github_repo: loki
+          #   images:
+          #     -  grafana/loki
+          #   chart_index_url: https://grafana.github.io/helm-charts/index.yaml
+
+          - chartName: nextcloud
+            chartType: optional
+            valuesChartName: nextcloud
+            github_user: nextcloud
+            github_repo: nextcloud
+            images:
+              -  nextcloud/nextcloud
+            chart_index_url: https://nextcloud.github.io/helm/index.yaml
     steps:
 
       - uses: actions/checkout@main
