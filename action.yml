@@ -59,7 +59,7 @@ inputs:
   myOutput:
     description: "Output from the action"
 outputs:
-  release:
+  latest_release:
     description: "released version of app"
 runs:
   using: "docker"

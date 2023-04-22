@@ -120,17 +120,17 @@ jobs:
       - name: Read output file
         id: read_output
         run: |
-          echo "::set-output name=release::$(cat output.txt | grep RELEASE= | cut -d'=' -f2)"
+          echo "::set-output name=latest_release::$(cat output.txt | grep LATEST_RELEASE= | cut -d'=' -f2)"
 
 
       - name: Save release output
         run: |
-          echo "RELEASE=${{ steps.read_output.outputs.release }}" >> $GITHUB_ENV
+          echo "LATEST_RELEASE=${{ steps.read_output.outputs.latest_release }}" >> $GITHUB_ENV
 
 
       - name: Display release value
         run: |
-          echo "Release value: $RELEASE"
+          echo "Latest Release value: $LATEST_RELEASE"
         
       # - name: Run Trivy vulnerability scanner
       #   run: |

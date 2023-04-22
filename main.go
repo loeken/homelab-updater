@@ -331,7 +331,7 @@ func main() {
 	}
 	defer f.Close()
 
-	_, err = f.WriteString(fmt.Sprintf("RELEASE=%s\n", tag))
+	_, err = f.WriteString(fmt.Sprintf("LATEST_RELEASE=%s\n", tag))
 	if err != nil {
 		fmt.Println("error: ", err)
 	}
