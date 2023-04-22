@@ -168,7 +168,7 @@ func UpdateChartVersionWithPR(chartName, owner, repo, filename, parentBlock, sub
 
 	return nil
 }
-func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock, newVersion, branch, token string) error {
+func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock, oldVersion, newVersion, branch, token string) error {
 
 	// create an authenticated github client
 	ctx := context.Background()
@@ -201,9 +201,7 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	}
 
 	// Update the chart version
-	if subBlock == "" {
-		values[parentBlock] = newVersion
-	}
+
 	if subBlock != "" {
 		values[parentBlock].(map[interface{}]interface{})[subBlock] = newVersion
 	}
@@ -212,7 +210,9 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	if err != nil {
 		return err
 	}
-
+	if subBlock == "" {
+		strings.ReplaceAll(string(updatedContent), oldVersion, newVersion)
+	}
 	// Create a new blob object for the updated content
 	newBlob, _, err := client.Git.CreateBlob(ctx, owner, repo, &github.Blob{
 		Content:  github.String(string(updatedContent)),
@@ -291,18 +291,18 @@ func main() {
 		fmt.Println(release + "<" + tag)
 		fmt.Println("update required newer release found")
 
-		err := UpdateChartVersionWithPR(chartName, "loeken", "homelab", "deploy/argocd/bootstrap-"+chartType+"-apps/values.yaml.example", chartName, "chartVersioN", tag, "main", token)
+		err := UpdateChartVersionWithPR(chartName, "loeken", "homelab", "deploy/argocd/bootstrap-"+chartType+"-apps/values.yaml.example", chartName, "chartVersion", tag, "main", token)
 		if err != nil {
 			fmt.Println("error encountered: ", err)
 		}
-		UpdateChartVersionWithPR(chartName, "loeken", "homelab-updater", "values-"+chartType+".yaml", chartName, "chartVersioN", tag, "main", token)
+		UpdateChartVersionWithPR(chartName, "loeken", "homelab-updater", "values-"+chartType+".yaml", chartName, "chartVersion", tag, "main", token)
 		if err != nil {
 			fmt.Println("error encountered: ", err)
 		}
 		if selfManagedImage == "true" {
 			fmt.Println("self managed  Image: ", chartName, "loeken", "docker-"+chartName, ".github/workflows/release.yml", "env", "version", tag, "main", token)
 
-			UpdateChartVersion(chartName, "loeken", "docker-"+chartName, "version.yaml", "env", "version", tag, "main", token)
+			UpdateChartVersion(chartName, "loeken", "docker-"+chartName, "version.yaml", chartName, "env", "version", tag, "main", token)
 			if err != nil {
 				fmt.Println("error encountered: ", err)
 			}
@@ -311,7 +311,7 @@ func main() {
 		if selfManagedChart == "true" {
 			fmt.Println("self managed  chart: ", chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "version", "", tag, "main", token)
 
-			UpdateChartVersion(chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "version", "", tag, "main", token)
+			UpdateChartVersion(chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "version", "", release, tag, "main", token)
 			if err != nil {
 				fmt.Println("error encountered: ", err)
 			}
