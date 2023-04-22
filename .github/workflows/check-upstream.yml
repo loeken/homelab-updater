@@ -86,6 +86,7 @@ jobs:
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
           cd $GITHUB_WORKSPACE
+
           echo "CHART_VERSION=$(cat values-${{ matrix.repo.chartType }}.yaml | yq -r '.${{ matrix.repo.chartName }}.chartVersion')"
           echo "CHART_VERSION=$(cat values-${{ matrix.repo.chartType }}.yaml | yq -r '.${{ matrix.repo.chartName }}.chartVersion')" >> $GITHUB_ENV
 
@@ -100,15 +101,16 @@ jobs:
           github_user: ${{ matrix.repo.github_user }}
           github_repo: ${{ matrix.repo.github_repo }}
           github_token: ${{ secrets.UPDATE_TOKEN }}
-          chart_name: ${{ matrix.repo.chartName }}
           chart_version: ${{ env.CHART_VERSION }}
+          chart_name: ${{ matrix.repo.chartName }}
           release_remove_string: ${{ matrix.repo.release_remove_string }}
           chart_type: ${{ matrix.repo.chartType }}
           self_managed_image: ${{ matrix.repo.self_managed_image }}
           docker_image: ${{ matrix.repo.docker_image }}
           remote_chart_name: ${{ matrix.repo.remote_chart_name }}
           self_managed_chart: ${{ matrix.repo.self_managed_chart }}
-
+        env:
+          GITHUB_ENV: ${{ github.workspace }}/.env
 
       - name: Save release output
         run: |
