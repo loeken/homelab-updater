@@ -109,8 +109,7 @@ jobs:
           docker_image: ${{ matrix.repo.docker_image }}
           remote_chart_name: ${{ matrix.repo.remote_chart_name }}
           self_managed_chart: ${{ matrix.repo.self_managed_chart }}
-        env:
-          GITHUB_ENV: ${{ github.workspace }}/.env
+
 
       - name: Save release output
         run: |
