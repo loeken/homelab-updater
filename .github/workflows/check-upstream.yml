@@ -10,20 +10,20 @@ jobs:
           - chartName: authelia
             chartType: optional
             github_user: authelia
-            github_repo: chartrepo
+            github_repo: authelia
             images:
               - authelia/authelia
             release_remove_string: authelia-
 
-          - chartName: certManager
-            chartType: core
-            github_user: cert-manager
-            github_repo: cert-manager
-            images:
-              - quay.io/jetstack/cert-manager-cainjector
-              - quay.io/jetstack/cert-manager-controller
-              - quay.io/jetstack/cert-manager-webhook
-            release_remove_string: ""
+          # - chartName: certManager
+          #   chartType: optional
+          #   github_user: cert-manager
+          #   github_repo: cert-manager
+          #   images:
+          #     - quay.io/jetstack/cert-manager-cainjector
+          #     - quay.io/jetstack/cert-manager-controller
+          #     - quay.io/jetstack/cert-manager-webhook
+          #   release_remove_string: ""
 
           # - chartName: nginxingress
           #   chartType: optional
