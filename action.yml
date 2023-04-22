@@ -29,6 +29,10 @@ inputs:
     default: "authelia-0.8.55"
     required: true
     description: "the version of the helm chart"
+  chart_index_url:
+    default: "https://charts.authelia.com/index.yaml"
+    required: true
+    description: "the url of the charts index"
   dockertag:
     default: main
     required: true

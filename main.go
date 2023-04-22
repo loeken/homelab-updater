@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -12,6 +13,45 @@ import (
 	"golang.org/x/oauth2"
 	"gopkg.in/yaml.v2"
 )
+
+type ChartVersion struct {
+	Version string `yaml:"version"`
+}
+
+type Chart struct {
+	Name     string         `yaml:"name"`
+	Versions []ChartVersion `yaml:"versions"`
+}
+
+type ChartIndex struct {
+	Entries map[string][]ChartVersion `yaml:"entries"`
+}
+
+func getLatestChartVersion(chartIndexURL, chartName string) (string, error) {
+	resp, err := http.Get(chartIndexURL)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var index ChartIndex
+	err = yaml.Unmarshal(body, &index)
+	if err != nil {
+		return "", err
+	}
+
+	// Find the latest version of the specified chart
+	if versions, ok := index.Entries[chartName]; ok {
+		return versions[0].Version, nil
+	}
+
+	return "", fmt.Errorf("chart %s not found", chartName)
+}
 
 func getLatestReleaseTag(owner, repo, token string) (string, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", owner, repo)
@@ -274,58 +314,67 @@ func main() {
 	owner := os.Getenv("INPUT_GITHUB_USER")
 	repo := os.Getenv("INPUT_GITHUB_REPO")
 	token := os.Getenv("INPUT_GITHUB_TOKEN")
-	// chart_version := os.Getenv("INPUT_CHART_VERSION")
+	chart_index_url := os.Getenv("INPUT_CHART_INDEX_URL")
 
-	// chartName := os.Getenv("INPUT_CHART_NAME")
+	chartName := os.Getenv("INPUT_CHART_NAME")
+	oldChartVersion := os.Getenv("INPUT_CHART_VERSION")
 	// remoteChartName := os.Getenv("INPUT_REMOTE_CHART_NAME")
-	// chartType := os.Getenv("INPUT_CHART_TYPE")
+	chartType := os.Getenv("INPUT_CHART_TYPE")
 	// releaseRemoveString := os.Getenv("INPUT_RELEASE_REMOVE_STRING")
 
 	// selfManagedImage := os.Getenv("INPUT_SELF_MANAGED_IMAGE")
 	// selfManagedChart := os.Getenv("INPUT_SELF_MANAGED_CHART")
 
-	tag, err := getLatestReleaseTag(owner, repo, token)
+	app_version, err := getLatestReleaseTag(owner, repo, token)
 	if err != nil {
 		fmt.Println("error: ", err)
 	}
 
-	// if chart_version < tag {
-	// 	if releaseRemoveString != "" {
-	// 		tag = strings.ReplaceAll(tag, releaseRemoveString, "")
-	// 	}
-	// 	fmt.Println("token: ", token)
-	// 	fmt.Println(chart_version + "<" + tag)
-	// 	fmt.Println("update required newer release found")
+	chart_version, err := getLatestChartVersion(chart_index_url, chartName)
+	if err != nil {
+		fmt.Println("error: ", err)
+	}
+	fmt.Println(oldChartVersion, "<", chart_version)
+	if oldChartVersion < chart_version {
+		// if releaseRemoveString != "" {
+		// 	tag = strings.ReplaceAll(tag, releaseRemoveString, "")
+		// }
+		fmt.Println("token: ", token)
+		fmt.Println("update required newer release found")
 
-	// 	err := UpdateChartVersionWithPR(chartName, "loeken", "homelab", "deploy/argocd/bootstrap-"+chartType+"-apps/values.yaml.example", chartName, "chartVersion", tag, "main", token)
-	// 	if err != nil {
-	// 		fmt.Println("error encountered: ", err)
-	// 	}
-	// 	UpdateChartVersionWithPR(chartName, "loeken", "homelab-updater", "values-"+chartType+".yaml", chartName, "chartVersion", tag, "main", token)
-	// 	if err != nil {
-	// 		fmt.Println("error encountered: ", err)
-	// 	}
-	// 	if selfManagedImage == "true" {
-	// 		fmt.Println("self managed  Image: ", chartName, "loeken", "docker-"+chartName, ".github/workflows/release.yml", "env", "version", tag, "main", token)
+		// update homelab
+		err := UpdateChartVersionWithPR(chartName, "loeken", "homelab", "deploy/argocd/bootstrap-"+chartType+"-apps/values.yaml.example", chartName, "chartVersion", chart_version, "main", token)
+		if err != nil {
+			fmt.Println("error encountered: ", err)
+		}
 
-	// 		UpdateChartVersion(chartName, "loeken", "docker-"+chartName, "version.yaml", chartName, "env", "version", tag, "main", token)
-	// 		if err != nil {
-	// 			fmt.Println("error encountered: ", err)
-	// 		}
-	// 		fmt.Println("finishied")
-	// 	}
-	// 	if selfManagedChart == "true" {
-	// 		fmt.Println("self managed  chart: ", chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "version", "", tag, "main", token)
+		// update values in this repo
+		UpdateChartVersionWithPR(chartName, "loeken", "homelab-updater", "values-"+chartType+".yaml", chartName, "chartVersion", chart_version, "main", token)
+		if err != nil {
+			fmt.Println("error encountered: ", err)
+		}
+		/*
+			if selfManagedImage == "true" {
+				fmt.Println("self managed  Image: ", chartName, "loeken", "docker-"+chartName, ".github/workflows/release.yml", "env", "version", tag, "main", token)
 
-	// 		UpdateChartVersion(chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", chartName, "version", "", tag, "main", token)
-	// 		if err != nil {
-	// 			fmt.Println("error encountered: ", err)
-	// 		}
-	// 		fmt.Println("finishied")
-	// 	}
+				UpdateChartVersion(chartName, "loeken", "docker-"+chartName, "version.yaml", chartName, "env", "version", tag, "main", token)
+				if err != nil {
+					fmt.Println("error encountered: ", err)
+				}
+				fmt.Println("finishied")
+			}
+			if selfManagedChart == "true" {
+				fmt.Println("self managed  chart: ", chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "version", "", tag, "main", token)
 
-	// 	fmt.Println(chartName, " chart version updated")
-	// }
+				UpdateChartVersion(chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", chartName, "version", "", tag, "main", token)
+				if err != nil {
+					fmt.Println("error encountered: ", err)
+				}
+				fmt.Println("finishied")
+			}
+		*/
+		fmt.Println(chartName, " chart version updated")
+	}
 
 	f, err := os.Create(outputFile)
 	if err != nil {
@@ -333,8 +382,13 @@ func main() {
 	}
 	defer f.Close()
 
-	_, err = f.WriteString(fmt.Sprintf("LATEST_RELEASE=%s\n", tag))
+	_, err = f.WriteString(fmt.Sprintf("LATEST_APP_RELEASE=%s\n", app_version))
 	if err != nil {
 		fmt.Println("error: ", err)
 	}
+	_, err = f.WriteString(fmt.Sprintf("LATEST_CHART_RELEASE=%s\n", chart_version))
+	if err != nil {
+		fmt.Println("error: ", err)
+	}
+
 }

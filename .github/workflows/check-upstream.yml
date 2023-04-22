@@ -14,6 +14,7 @@ jobs:
             images:
               - authelia/authelia
             release_remove_string: authelia-
+            chart_index_url: https://charts.authelia.com/index.yaml
 
           # - chartName: certManager
           #   chartType: optional
@@ -94,13 +95,15 @@ jobs:
       - name: test for pending updates
         # Put your action repo here
         id: test_updates
-        uses: loeken/homelab-updater@main
+        uses: ./
+        #uses: loeken/homelab-updater@main
         with:
           github_user: ${{ matrix.repo.github_user }}
           github_repo: ${{ matrix.repo.github_repo }}
           github_token: ${{ secrets.UPDATE_TOKEN }}
-          chart_version: ${{ env.CHART_VERSION }}
+          chart_index_url: ${{ matrix.repo.chart_index_url }}
           chart_name: ${{ matrix.repo.chartName }}
+          chart_version: ${{ env.CHART_VERSION }}
           release_remove_string: ${{ matrix.repo.release_remove_string }}
           chart_type: ${{ matrix.repo.chartType }}
           self_managed_image: ${{ matrix.repo.self_managed_image }}
@@ -113,17 +116,20 @@ jobs:
       - name: Read output file
         id: read_output
         run: |
-          echo "::set-output name=latest_release::$(cat output.txt | grep LATEST_RELEASE= | cut -d'=' -f2)"
+          echo "::set-output name=latest_app_release::$(cat output.txt | grep LATEST_APP_RELEASE= | cut -d'=' -f2)"
+          echo "::set-output name=latest_chart_release::$(cat output.txt | grep LATEST_CHART_RELEASE= | cut -d'=' -f2)"
 
 
       - name: Save release output
         run: |
-          echo "LATEST_RELEASE=${{ steps.read_output.outputs.latest_release }}" >> $GITHUB_ENV
+          echo "LATEST_APP_RELEASE=${{ steps.read_output.outputs.latest_app_release }}" >> $GITHUB_ENV
+          echo "LATEST_CHART_RELEASE=${{ steps.read_output.outputs.latest_chart_release }}" >> $GITHUB_ENV
 
 
       - name: Display release value
         run: |
-          echo "Latest Release value: $LATEST_RELEASE"
+          echo "Latest APP Release value: $LATEST_APP_RELEASE"
+          echo "Latest CHART Release value: $LATEST_CHART_RELEASE"
         
       # - name: Run Trivy vulnerability scanner
       #   run: |
