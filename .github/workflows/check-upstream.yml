@@ -109,10 +109,17 @@ jobs:
           docker_image: ${{ matrix.repo.docker_image }}
           remote_chart_name: ${{ matrix.repo.remote_chart_name }}
           self_managed_chart: ${{ matrix.repo.self_managed_chart }}
+        env:
+          GITHUB_ENV: ${{ github.workspace }}/.env
+
+      - name: Save release output
+        run: |
+          echo "${{ steps.test_updates.outputs.stdout }}" >> $GITHUB_ENV
+
       - name: Display release value
         run: |
-          echo "Release value: ${{ steps.test_updates.outputs.release }}"
-          
+          echo "Release value: $RELEASE"
+        
       # - name: Run Trivy vulnerability scanner
       #   run: |
       #     for image in ${{ join(matrix.repo.images, ' ') }}; do
