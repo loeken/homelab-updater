@@ -15,7 +15,7 @@ authelia:
 ceph:
   enabled: false
 certmanager:
-  chartVersion: 1.11.1
+  chartVersion: 1.11.0
   enabled: false
 cloudflaretunnel:
   enabled: true
@@ -28,6 +28,7 @@ democratic_nfs:
   enabled: false
 domain: example.com
 externaldns:
+  chartVersion: 6.11.3
   enabled: false
 githubRepo: homelab-example
 githubUser: loeken
