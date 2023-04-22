@@ -42,7 +42,9 @@ func getLatestReleaseTag(owner, repo, token string) (string, error) {
 	}
 
 	// Strip the "v" prefix from the tag name if it exists
-	return release.TagName, nil
+
+	strippedTag := strings.TrimPrefix(release.TagName, "v")
+	return strippedTag, nil
 }
 func UpdateChartVersionWithPR(chartName, owner, repo, filename, parentBlock, subBlock, newVersion, branch, token string) error {
 
