@@ -50,7 +50,12 @@ func getLatestChartVersion(chartIndexURL, chartName string) (string, error) {
 		for _, version := range versions {
 			if !strings.Contains(version.Version, "alpha") && !strings.Contains(version.Version, "beta") {
 				strippedTag := strings.TrimPrefix(version.Version, "v")
-				return strippedTag, nil
+				parts := strings.Split(strippedTag, ".")
+				if len(parts) > 3 {
+					parts = parts[:3]
+				}
+				version := strings.Join(parts, ".")
+				return version, nil
 			}
 		}
 		return "", fmt.Errorf("no stable version found for chart %s", chartName)
@@ -360,7 +365,7 @@ func main() {
 	oldChartVersion := os.Getenv("INPUT_CHART_VERSION")
 	remoteChartName := os.Getenv("INPUT_REMOTE_CHART_NAME")
 	chartType := os.Getenv("INPUT_CHART_TYPE")
-	// releaseRemoveString := os.Getenv("INPUT_RELEASE_REMOVE_STRING")
+	releaseRemoveString := os.Getenv("INPUT_RELEASE_REMOVE_STRING")
 
 	selfManagedImage := os.Getenv("INPUT_SELF_MANAGED_IMAGE")
 	selfManagedChart := os.Getenv("INPUT_SELF_MANAGED_CHART")
@@ -377,6 +382,7 @@ func main() {
 			app_version = chart_version
 		}
 	}
+	app_version = strings.Replace(app_version, releaseRemoveString, "", -1)
 
 	fmt.Println("chart:", chart_version)
 	fmt.Println("app:", app_version)
