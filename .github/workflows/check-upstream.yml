@@ -223,6 +223,7 @@ jobs:
             images:
               -  loeken/radarr
             chart_index_url: https://loeken.github.io/helm-charts/index.yaml
+            dockertagprefix: version-
           
           - chartName: rtorrent-flood
             chartType: optional
