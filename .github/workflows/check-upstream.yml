@@ -200,6 +200,7 @@ jobs:
             images:
               -  loeken/nzbget
             chart_index_url: https://loeken.github.io/helm-charts/index.yaml
+            dockertagprefix: version-v
   
           - chartName: prowlarr
             chartType: optional
