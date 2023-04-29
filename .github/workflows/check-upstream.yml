@@ -268,8 +268,8 @@ jobs:
             github_repo: whoami
             images:
               -  traefik/whoami
-            chart_index_url: https://gitlab.com/api/v4/projects/37200623/packages/helm/stable/index.yaml
-            dockertagprefix: "v"
+            chart_index_url: https://cowboysysop.github.io/charts/index.yaml
+            dockertagprefix: ""
     steps:
 
       - uses: actions/checkout@main
@@ -332,8 +332,8 @@ jobs:
           for image in ${{ join(matrix.repo.images, ' ') }}; do
             echo "Running trivy for $image"
             if [ "${{ matrix.repo.dockertagoverride }}" != "" ]; then
-              docker run --rm aquasec/trivy image $image:${{ matrix.repo.dockertagoverride }}
+              docker run --rm aquasec/trivy image --timeout 5m0s $image:${{ matrix.repo.dockertagoverride }}
             else
-              docker run --rm aquasec/trivy image $image:${{ matrix.repo.dockertagprefix }}$LATEST_APP_RELEASE
+              docker run --rm aquasec/trivy image --timeout 5m0s $image:${{ matrix.repo.dockertagprefix }}$LATEST_APP_RELEASE
             fi
           done
