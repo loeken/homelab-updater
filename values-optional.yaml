@@ -162,7 +162,7 @@ prowlarr:
   storageClass: local-path
   useAuthelia: false
 radarr:
-  chartVersion: 4.3.2
+  chartVersion: 4.4.4
   enabled: false
   ingress:
     cloudflaretunnel:
@@ -218,7 +218,7 @@ vaultwarden:
 volumesnapshots:
   enabled: true
 whoami:
-  chartVersion: 0.1.6
+  chartVersion: 3.1.0
   enabled: true
   ingress:
     cloudflaretunnel:
