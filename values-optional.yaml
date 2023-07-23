@@ -34,7 +34,7 @@ externaldns:
 githubRepo: homelab-example
 githubUser: loeken
 ha:
-  chartVersion: 2023.7.2
+  chartVersion: 2023.5.3
   enabled: false
   ingress:
     cloudflaretunnel:
@@ -71,9 +71,11 @@ jellyseerr:
   storageClass: local-path
   useAuthelia: false
 k10:
-  chartVersion: 5.5.9
+  chartVersion: 6.0.3
   enabled: false
   storageClass: local-path
+linkerd:
+  enabled: false
 loki:
   alertmanager:
     enabled: false
@@ -181,8 +183,9 @@ rtorrentflood:
   storageClass: local-path
   useAuthelia: false
 sharedmedia:
-  size: 1000Gi
-  storageClass: local-path
+  enabled: false
+  size: 100Gi
+  storageClass: nfs-client
 sonarr:
   chartVersion: 3.0.9
   enabled: false
