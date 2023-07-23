@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/google/go-github/v38/github"
@@ -132,6 +134,7 @@ func getLatestReleaseTag(owner, repo, token string) (string, error) {
 }
 func UpdateChartVersionWithPR(chartName, owner, repo, filename, parentBlock, subBlock, newVersion, branch, token string) error {
 
+	fmt.Println(repo, chartName, filename, owner, branch)
 	ctx := context.Background()
 
 	ts := oauth2.StaticTokenSource(
@@ -198,7 +201,7 @@ func UpdateChartVersionWithPR(chartName, owner, repo, filename, parentBlock, sub
 	parentSHA := ref.Object.GetSHA()
 	fmt.Println("filenmae path:")
 	fmt.Println(fileContent.GetPath())
-	fmt.Println(newBlob.SHA)
+	fmt.Println(*newBlob.SHA)
 	// Create a new tree object with the updated file
 	newTree, _, err := client.Git.CreateTree(ctx, owner, repo, parentSHA, []*github.TreeEntry{
 		{
@@ -256,6 +259,7 @@ func UpdateChartVersionWithPR(chartName, owner, repo, filename, parentBlock, sub
 }
 func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock, oldVersion, newVersion, branch, token string) error {
 
+	fmt.Println("we here")
 	// create an authenticated github client
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
@@ -267,6 +271,7 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 		Ref: branch,
 	})
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
@@ -287,8 +292,9 @@ func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock,
 	}
 
 	// Update the chart version
-
+	fmt.Println(subBlock)
 	if subBlock != "" {
+		fmt.Println("newVersion:" + newVersion)
 		values[parentBlock].(map[interface{}]interface{})[subBlock] = newVersion
 	}
 	// Marshal the updated values back to YAML
@@ -369,11 +375,11 @@ func main() {
 
 	selfManagedImage := os.Getenv("INPUT_SELF_MANAGED_IMAGE")
 	selfManagedChart := os.Getenv("INPUT_SELF_MANAGED_CHART")
+	dockerTagPrefix := os.Getenv("INPUT_DOCKERTAGPREFIX")
+	dockerTagSuffix := os.Getenv("INPUT_DOCKERTAGSUFFIX")
 
-	chart_version, err := getLatestChartVersion(chart_index_url, chartName)
-	if err != nil {
-		fmt.Println("error: ", err)
-	}
+	var chart_version string
+	var err error
 
 	app_version, err := getLatestReleaseTag(owner, repo, token)
 	if err != nil {
@@ -383,13 +389,92 @@ func main() {
 		}
 	}
 	app_version = strings.Replace(app_version, releaseRemoveString, "", -1)
+	app_version = dockerTagPrefix + app_version + dockerTagSuffix
+	if chart_index_url == "" {
+		// try and get app Version:
+		oldAppVersion, _ := GetAppVersionFromGitHubChart("loeken", "helm-charts", chartName, token)
+		oldAppVersion = strings.ReplaceAll(oldAppVersion, releaseRemoveString, "")
 
+		fmt.Println("oldAppVersioN" + oldAppVersion)
+
+		if selfManagedImage == "true" {
+			result := compareVersions(oldAppVersion, app_version)
+			if result < 0 {
+
+				fmt.Println("detected new version: " + app_version + " old version:" + oldAppVersion)
+				fmt.Println(
+					chartName,
+					"loeken",
+					"docker-"+chartName,
+					".github/workflows/release.yml",
+					"env",
+					"version",
+					oldAppVersion,
+					app_version,
+					"main",
+					token,
+				)
+				err := UpdateChartVersion(
+					chartName,
+					"loeken",
+					"docker-"+chartName,
+					".github/workflows/release.yml",
+					"env",
+					"version",
+					oldAppVersion,
+					app_version,
+					"main",
+					token,
+				)
+				if err != nil {
+					fmt.Println("error encountered: ", err)
+				}
+
+				fmt.Println("finishied")
+				os.Exit(1)
+			}
+			chart_version = oldChartVersion
+		}
+
+	} else {
+		chart_version, err = getLatestChartVersion(chart_index_url, chartName)
+		if err != nil {
+			fmt.Println("error: ", err)
+
+		}
+	}
 	fmt.Println("chart:", chart_version)
 	fmt.Println("app:", app_version)
+	fmt.Println("old chart version:", oldChartVersion)
 
-	if oldChartVersion < chart_version {
+	fmt.Println(oldChartVersion + "<" + chart_version)
+
+	result := compareVersions(oldChartVersion, chart_version)
+	if result < 0 {
 
 		fmt.Println("update required newer release found")
+
+		if selfManagedImage == "true" {
+
+			UpdateChartVersion(chartName, "loeken", "docker-"+chartName, "version.yaml", valuesChartName, "env", "version", chart_version, "main", token)
+			if err != nil {
+				fmt.Println("error encountered: ", err)
+			}
+			fmt.Println("finishied")
+		}
+
+		if selfManagedChart == "true" {
+			fmt.Println("self managed  chart: ", chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "version", "", oldChartVersion, chart_version, "main", token)
+			UpdateChartVersion(chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "version", "", oldChartVersion, chart_version, "main", token)
+			if err != nil {
+				fmt.Println("error encountered: ", err)
+			}
+			UpdateChartVersion(chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "appVersion", "", oldChartVersion, chart_version, "main", token)
+			if err != nil {
+				fmt.Println("error encountered: ", err)
+			}
+			fmt.Println("finishied")
+		}
 
 		// update homelab
 		err := UpdateChartVersionWithPR(valuesChartName, "loeken", "homelab", "deploy/argocd/bootstrap-"+chartType+"-apps/values.yaml.example", valuesChartName, "chartVersion", chart_version, "main", token)
@@ -403,27 +488,9 @@ func main() {
 			fmt.Println("error encountered: ", err)
 		}
 
-		if selfManagedImage == "true" {
-			fmt.Println("self managed  Image: ", chartName, "loeken", "docker-"+chartName, ".github/workflows/release.yml", "env", "version", chart_version, "main", token)
-
-			UpdateChartVersion(chartName, "loeken", "docker-"+chartName, "version.yaml", valuesChartName, "env", "version", chart_version, "main", token)
-			if err != nil {
-				fmt.Println("error encountered: ", err)
-			}
-			fmt.Println("finishied")
-		}
-
-		if selfManagedChart == "true" {
-			fmt.Println("self managed  chart: ", chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", "version", "", chart_version, "main", token)
-
-			UpdateChartVersion(chartName, "loeken", "helm-charts", "charts/"+remoteChartName+"/Chart.yaml", valuesChartName, "version", "", chart_version, "main", token)
-			if err != nil {
-				fmt.Println("error encountered: ", err)
-			}
-			fmt.Println("finishied")
-		}
-
 		fmt.Println(chartName, " chart version updated")
+	} else {
+		fmt.Println("else")
 	}
 
 	f, err := os.Create(outputFile)
@@ -441,4 +508,103 @@ func main() {
 		fmt.Println("error: ", err)
 	}
 
+}
+func compareVersions(version1, version2 string) int {
+	parts1 := strings.Split(version1, ".")
+	parts2 := strings.Split(version2, ".")
+
+	// Ensure both versions have the same number of components
+	maxParts := len(parts1)
+	if len(parts2) > maxParts {
+		maxParts = len(parts2)
+	}
+
+	// Compare each component numerically
+	for i := 0; i < maxParts; i++ {
+		num1 := 0
+		num2 := 0
+
+		if i < len(parts1) {
+			num1, _ = strconv.Atoi(parts1[i])
+		}
+		if i < len(parts2) {
+			num2, _ = strconv.Atoi(parts2[i])
+		}
+
+		if num1 < num2 {
+			return -1
+		} else if num1 > num2 {
+			return 1
+		}
+	}
+
+	// All components are equal
+	return 0
+}
+
+type RemoteChart struct {
+	AppVersion string `yaml:"appVersion"`
+}
+
+type GitHubContent struct {
+	Content string `json:"content"`
+}
+
+func GetFileContentFromGitHub(owner, repo, path, token string) (string, error) {
+	// Build the request URL
+	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/contents/%s", owner, repo, path)
+
+	// Create a new request
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", err
+	}
+
+	// Set the Authorization header
+	req.Header.Set("Authorization", fmt.Sprintf("token %s", token))
+
+	// Send the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// Parse the response
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to get file content: %s", resp.Status)
+	}
+
+	var content GitHubContent
+	err = json.NewDecoder(resp.Body).Decode(&content)
+	if err != nil {
+		return "", err
+	}
+
+	// The content is base64 encoded, so it needs to be decoded
+	decoded, err := base64.StdEncoding.DecodeString(content.Content)
+	if err != nil {
+		return "", err
+	}
+
+	return string(decoded), nil
+}
+func GetAppVersionFromGitHubChart(owner, repo, chartName, token string) (string, error) {
+	// Build the path to the Chart.yaml file
+	path := fmt.Sprintf("charts/%s/Chart.yaml", chartName)
+
+	// Get the file content from GitHub
+	content, err := GetFileContentFromGitHub(owner, repo, path, token)
+	if err != nil {
+		return "", err
+	}
+	// Parse the YAML content
+	var chart RemoteChart
+	err = yaml.Unmarshal([]byte(content), &chart)
+	if err != nil {
+		return "", err
+	}
+
+	return chart.AppVersion, nil
 }

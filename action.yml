@@ -60,7 +60,11 @@ inputs:
     description: if helm chart is managed by me
     required: true
     default: "false"
-  dockertagoverride:
+  dockertagprefix:
+    description: "overwrites dockertag"
+    required: true
+    default: ''
+  dockertagsuffix:
     description: "overwrites dockertag"
     required: true
     default: ''
