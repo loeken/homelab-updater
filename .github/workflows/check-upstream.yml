@@ -305,7 +305,7 @@ jobs:
         with:
           github_user: ${{ matrix.repo.github_user }}
           github_repo: ${{ matrix.repo.github_repo }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.UPDATE_TOKEN }}
           chart_index_url: ${{ matrix.repo.chart_index_url }}
           chart_name: ${{ matrix.repo.chartName }}
           values_chart_name: ${{ matrix.repo.valuesChartName }}
