@@ -60,6 +60,10 @@ inputs:
     description: if helm chart is managed by me
     required: true
     default: "false"
+  dockertagoverride:
+    description: "overwrites dockertag"
+    required: true
+    default: ''
   myOutput:
     description: "Output from the action"
 outputs:
