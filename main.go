@@ -63,13 +63,19 @@ func main() {
 	if err1 != nil {
 		fmt.Println("error: ", err)
 	}
-	repo_app_version := strings.Replace(chartInfo.AppVersion, releaseRemoveString, "", -1)
-	repo_app_version = dockerTagPrefix + repo_app_version + dockerTagSuffix
-	fmt.Println("app version in chart: " + repo_app_version)
+	chart_app_version := strings.Replace(chartInfo.AppVersion, releaseRemoveString, "", -1)
+	chart_app_version = dockerTagPrefix + chart_app_version + dockerTagSuffix
+	fmt.Println("app version in chart: " + chart_app_version)
 	fmt.Println("chart version: " + chartInfo.Version)
 	fmt.Println("current chart version in repo: " + oldChartVersion)
 	if compareVersions(oldChartVersion, chartVersion) < 0 {
 		fmt.Println("new version found of chart")
+		os.Exit(1)
+	} else {
+		if compareVersions(chart_app_version, app_version) < 0 {
+			fmt.Println("new version found of app found")
+			os.Exit(1)
+		}
 	}
 }
 func compareVersions(version1, version2 string) int {
