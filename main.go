@@ -41,7 +41,7 @@ func main() {
 	// chartType := os.Getenv("INPUT_CHART_TYPE")
 	releaseRemoveString := os.Getenv("INPUT_RELEASE_REMOVE_STRING")
 
-	// selfManagedImage := os.Getenv("INPUT_SELF_MANAGED_IMAGE")
+	selfManagedImage := os.Getenv("INPUT_SELF_MANAGED_IMAGE")
 	// selfManagedChart := os.Getenv("INPUT_SELF_MANAGED_CHART")
 	dockerTagPrefix := os.Getenv("INPUT_DOCKERTAGPREFIX")
 	dockerTagSuffix := os.Getenv("INPUT_DOCKERTAGSUFFIX")
@@ -58,7 +58,7 @@ func main() {
 	}
 	app_version = strings.Replace(app_version, releaseRemoveString, "", -1)
 	app_version = dockerTagPrefix + app_version + dockerTagSuffix
-	fmt.Println("repo app version: " + app_version)
+	fmt.Println("app version in src repo: " + app_version)
 	chartInfo, err1 := getLatestChartVersion(chart_index_url, chartName)
 	if err1 != nil {
 		fmt.Println("error: ", err)
@@ -73,8 +73,11 @@ func main() {
 		os.Exit(1)
 	} else {
 		if compareVersions(chart_app_version, app_version) < 0 {
-			fmt.Println("new version found of app found")
-			os.Exit(1)
+			if selfManagedImage == "true" {
+				fmt.Println("new version found of app found")
+				os.Exit(1)
+			}
+
 		}
 	}
 }
