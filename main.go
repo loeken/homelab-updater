@@ -1,15 +1,21 @@
 package main
 
 import (
+	"bytes"
+	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 
-	"gopkg.in/yaml.v2"
+	"github.com/google/go-github/v53/github"
+	"golang.org/x/oauth2"
+	"gopkg.in/yaml.v3"
 )
 
 type ChartVersion struct {
@@ -35,7 +41,7 @@ func main() {
 	chart_index_url := os.Getenv("INPUT_CHART_INDEX_URL")
 
 	chartName := os.Getenv("INPUT_CHART_NAME")
-	// valuesChartName := os.Getenv("INPUT_VALUES_CHART_NAME")
+	valuesChartName := os.Getenv("INPUT_VALUES_CHART_NAME")
 	oldChartVersion := os.Getenv("INPUT_CHART_VERSION")
 	// remoteChartName := os.Getenv("INPUT_REMOTE_CHART_NAME")
 	// chartType := os.Getenv("INPUT_CHART_TYPE")
@@ -74,7 +80,48 @@ func main() {
 	} else {
 		if compareVersions(chart_app_version, app_version) < 0 {
 			if selfManagedImage == "true" {
-				fmt.Println("new version found of app found")
+				fmt.Println("new version found of self managed app found")
+				err := UpdateChartVersion(
+					chartName,
+					"loeken",
+					"docker-"+valuesChartName,
+					"version.yaml",
+					"env",
+					"version",
+					app_version,
+					"main",
+					token,
+				)
+				if err != nil {
+					fmt.Println("error encountered: ", err)
+				}
+
+				err4 := UpdateHelmChartVersionsWithPR(
+					chartName,
+					"loeken",
+					"helm-charts",
+					"charts/"+chartName+"/Chart.yaml",
+					extractVersion(app_version),
+					app_version,
+					"main",
+					token,
+				)
+				if err4 != nil {
+					fmt.Println("error encountered: ", err4)
+				}
+
+				// update homelab
+				err1 := UpdateChartVersionWithPR(valuesChartName, "loeken", "homelab", "deploy/argocd/bootstrap-optional-apps/values.yaml.example", valuesChartName, "chartVersion", app_version, "main", token)
+				if err1 != nil {
+					fmt.Println("error encountered: ", err1)
+				}
+
+				// update values in this repo
+				err2 := UpdateChartVersionWithPR(valuesChartName, "loeken", "homelab-updater", "values-optional.yaml", valuesChartName, "chartVersion", app_version, "main", token)
+				if err2 != nil {
+					fmt.Println("error encountered: ", err2)
+				}
+
 				os.Exit(1)
 			}
 
@@ -217,4 +264,382 @@ func getLatestReleaseTag(owner, repo, token string) (string, error) {
 	} else {
 		return "", fmt.Errorf("failed to get latest release tag: %s", resp.Status)
 	}
+}
+func UpdateChartVersion(chartName, owner, repo, filename, parentBlock, subBlock, newVersion, branch, token string) error {
+
+	client := &http.Client{}
+
+	// GET request to fetch file contents
+	fmt.Printf(fmt.Sprintf("https://api.github.com/repos/%s/%s/contents/%s", owner, repo, filename))
+	getReq, err := http.NewRequest("GET", fmt.Sprintf("https://api.github.com/repos/%s/%s/contents/%s", owner, repo, filename), nil)
+	if err != nil {
+		return err
+	}
+
+	getReq.Header.Set("Authorization", "token "+token)
+
+	getResp, err := client.Do(getReq)
+	if err != nil {
+		return err
+	}
+	defer getResp.Body.Close()
+
+	getBody, err := ioutil.ReadAll(getResp.Body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("GET request status: ", getResp.Status)
+	fmt.Println("GET request body: ", string(getBody))
+
+	// Unmarshal the response
+	getRespMap := make(map[string]interface{})
+	err = json.Unmarshal(getBody, &getRespMap)
+	if err != nil {
+		return err
+	}
+
+	// Decode content
+	decodedContent, err := base64.StdEncoding.DecodeString(getRespMap["content"].(string))
+	if err != nil {
+		return err
+	}
+
+	yamlMap := make(map[interface{}]interface{})
+	err = yaml.Unmarshal(decodedContent, &yamlMap)
+	if err != nil {
+		return err
+	}
+
+	env, ok := yamlMap["env"].(map[interface{}]interface{})
+	if !ok {
+		return fmt.Errorf("no env section found in the file")
+	}
+	env["version"] = newVersion
+
+	updatedContent, err := yaml.Marshal(yamlMap)
+	if err != nil {
+		return err
+	}
+	fmt.Println("sha of file:", getRespMap["sha"])
+	// Prepare request body for the PUT request
+	putReqBody := map[string]interface{}{
+		"message": "Update version to " + newVersion,
+		"content": base64.StdEncoding.EncodeToString(updatedContent),
+		"branch":  branch,
+		"sha":     getRespMap["sha"],
+		"committer": map[string]string{
+			"name":  "loeken",
+			"email": "loeken@internetz.me",
+		},
+	}
+	putReqBodyBytes, err := json.Marshal(putReqBody)
+	if err != nil {
+		return err
+	}
+
+	// PUT request to update file
+	putReq, err := http.NewRequest("PUT", fmt.Sprintf("https://api.github.com/repos/%s/%s/contents/%s", owner, repo, filename), bytes.NewBuffer(putReqBodyBytes))
+	if err != nil {
+		return err
+	}
+
+	putReq.Header.Set("Accept", "application/vnd.github+json")
+	putReq.Header.Set("Authorization", "Bearer "+token)
+	putReq.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+	putReq.Header.Set("Content-Type", "application/json")
+
+	putResp, err := client.Do(putReq)
+	if err != nil {
+		return err
+	}
+	defer putResp.Body.Close()
+
+	putBody, err := ioutil.ReadAll(putResp.Body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("PUT request status: ", putResp.Status)
+	fmt.Println("PUT request body: ", string(putBody))
+
+	return nil
+}
+func UpdateChartVersionWithPR(chartName, owner, repo, filename, parentBlock, subBlock, newVersion, branch, token string) error {
+
+	fmt.Println(repo, chartName, filename, owner, branch)
+	ctx := context.Background()
+
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+
+	client := github.NewClient(tc)
+
+	// Get the current contents of the file
+	fileContent, _, _, err := client.Repositories.GetContents(ctx, owner, repo, filename, &github.RepositoryContentGetOptions{
+		Ref: branch,
+	})
+	if err != nil {
+
+		fmt.Println("error getting file content:", err)
+		return err
+	}
+
+	// Decode the file content from base64
+	contentBytes, err := fileContent.GetContent()
+	if err != nil {
+		fmt.Printf("error decoding file content: %v", err)
+		return err
+	}
+
+	// Update the YAML value
+
+	// Convert contentBytes to a byte slice
+	content := []byte(contentBytes)
+
+	// Unmarshal the YAML content into a map
+	values := make(map[interface{}]interface{})
+	if err := yaml.Unmarshal(content, &values); err != nil {
+		fmt.Printf("error unmarshalling YAML: %v", err)
+		return err
+	}
+
+	// Update the chart version
+	values[parentBlock].(map[interface{}]interface{})[subBlock] = newVersion
+
+	// Marshal the updated values back to YAML
+	updatedContent, err := yaml.Marshal(values)
+	if err != nil {
+		fmt.Printf("error marshalling YAML: %v", err)
+		return err
+	}
+	fmt.Println(updatedContent)
+	// Create a new blob object for the updated content
+	newBlob, _, err := client.Git.CreateBlob(ctx, owner, repo, &github.Blob{
+		Content:  github.String(string(updatedContent)),
+		Encoding: github.String("utf-8"),
+	})
+	if err != nil {
+		fmt.Println("Error creating blob: ", err)
+		return err
+	}
+	fmt.Println("New blob SHA:", *newBlob.SHA)
+
+	// Get the latest commit object for the branch
+	ref, _, err := client.Git.GetRef(ctx, owner, repo, fmt.Sprintf("refs/heads/%s", branch))
+	if err != nil {
+		fmt.Printf("error getting ref: %v", err)
+		return err
+	}
+	parentSHA := ref.Object.GetSHA()
+	fmt.Println("filenmae path:")
+	fmt.Println(fileContent.GetPath())
+	fmt.Println(*newBlob.SHA)
+	// Create a new tree object with the updated file
+	newTree, _, err := client.Git.CreateTree(ctx, owner, repo, parentSHA, []*github.TreeEntry{
+		{
+			Path: github.String(fileContent.GetPath()),
+			Mode: github.String("100644"),
+			Type: github.String("blob"),
+			SHA:  newBlob.SHA,
+		},
+	})
+	if err != nil {
+		fmt.Printf("error creating tree: %v", err)
+		return err
+	}
+
+	// Create a new commit object with the updated tree object
+	newCommit, _, err := client.Git.CreateCommit(ctx, owner, repo, &github.Commit{
+		Message: github.String(fmt.Sprintf("Update %s to version %s", chartName, newVersion)),
+		Tree:    newTree,
+		Parents: []*github.Commit{{SHA: &parentSHA}},
+	})
+	if err != nil {
+		fmt.Printf("error creating commit: %v", err)
+		return err
+	}
+
+	// Create a new reference for the updated commit
+	newBranch := fmt.Sprintf("refs/heads/update-%s-to-%s", chartName, newVersion)
+	_, _, err = client.Git.CreateRef(ctx, owner, repo, &github.Reference{
+		Ref:    github.String(newBranch),
+		Object: &github.GitObject{SHA: newCommit.SHA},
+	})
+	if err != nil {
+		fmt.Printf("error creating reference: %v", err)
+		return err
+	}
+
+	// Create a pull request with the changes
+	title := fmt.Sprintf("Update %s to version %s", chartName, newVersion)
+	body := fmt.Sprintf("Update %s to version %s", chartName, newVersion)
+	newPR, _, err := client.PullRequests.Create(ctx, owner, repo, &github.NewPullRequest{
+		Title: github.String(title),
+		Body:  github.String(body),
+		Head:  github.String(newBranch),
+		Base:  github.String(branch),
+	})
+	if err != nil {
+		fmt.Printf("failed to create pull request: %v", err)
+		return err
+	}
+
+	// Print the URL of the new pull request
+	fmt.Printf("Created pull request %s\n", newPR.GetHTMLURL())
+
+	return nil
+}
+func updateYAMLContent(values map[interface{}]interface{}, newVersion string, appVersion string) {
+	// Update appVersion
+	values["appVersion"] = appVersion
+
+	// Update version
+	values["version"] = newVersion
+
+	// Update annotations
+	if annotations, ok := values["annotations"].(map[interface{}]interface{}); ok {
+		newVersion = strings.Replace(newVersion, "-", " ", -1)
+		updatedChanges := fmt.Sprintf("- kind: changed\n  description: updated to %s", newVersion)
+		annotations["artifacthub.io/changes"] = updatedChanges
+	}
+}
+func extractVersion(input string) string {
+	// Use regular expression to extract numbers separated by dots
+	re := regexp.MustCompile(`(\d+\.\d+\.?\d*?)`)
+	matches := re.FindStringSubmatch(input)
+
+	if len(matches) == 0 {
+		return "" // Return an empty string if no matches found
+	}
+
+	versionParts := strings.Split(matches[1], ".")
+
+	// If only two parts found, append ".0"
+	if len(versionParts) == 2 {
+		versionParts = append(versionParts, "0")
+	}
+
+	return strings.Join(versionParts, ".")
+}
+func UpdateHelmChartVersionsWithPR(chartName, owner, repo, filename, newVersion, appVersion, branch, token string) error {
+	ctx := context.Background()
+
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+
+	client := github.NewClient(tc)
+
+	// Get the current contents of the file
+	fileContent, _, _, err := client.Repositories.GetContents(ctx, owner, repo, filename, &github.RepositoryContentGetOptions{
+		Ref: branch,
+	})
+	if err != nil {
+		fmt.Println("error getting file content:", err)
+		return err
+	}
+
+	// Decode the file content from base64
+	contentBytes, err := fileContent.GetContent()
+	if err != nil {
+		fmt.Printf("error decoding file content: %v", err)
+		return err
+	}
+
+	// Convert contentBytes to a byte slice
+	content := []byte(contentBytes)
+
+	// Unmarshal the YAML content into a map
+	values := make(map[interface{}]interface{})
+	if err := yaml.Unmarshal(content, &values); err != nil {
+		fmt.Printf("error unmarshalling YAML: %v", err)
+		return err
+	}
+
+	// Update the specific blocks in the YAML
+	updateYAMLContent(values, newVersion, appVersion)
+
+	// Marshal the updated values back to YAML
+	updatedContent, err := yaml.Marshal(values)
+	if err != nil {
+		fmt.Printf("error marshalling YAML: %v", err)
+		return err
+	}
+
+	// Create a new blob object for the updated content
+	newBlob, _, err := client.Git.CreateBlob(ctx, owner, repo, &github.Blob{
+		Content:  github.String(string(updatedContent)),
+		Encoding: github.String("utf-8"),
+	})
+	if err != nil {
+		fmt.Println("Error creating blob: ", err)
+		return err
+	}
+
+	// Get the latest commit object for the branch
+	ref, _, err := client.Git.GetRef(ctx, owner, repo, fmt.Sprintf("refs/heads/%s", branch))
+	if err != nil {
+		fmt.Printf("error getting ref: %v", err)
+		return err
+	}
+	parentSHA := ref.Object.GetSHA()
+
+	// Create a new tree object with the updated file
+	newTree, _, err := client.Git.CreateTree(ctx, owner, repo, parentSHA, []*github.TreeEntry{
+		{
+			Path: github.String(fileContent.GetPath()),
+			Mode: github.String("100644"),
+			Type: github.String("blob"),
+			SHA:  newBlob.SHA,
+		},
+	})
+	if err != nil {
+		fmt.Printf("error creating tree: %v", err)
+		return err
+	}
+
+	// Create a new commit object with the updated tree object
+	newCommit, _, err := client.Git.CreateCommit(ctx, owner, repo, &github.Commit{
+		Message: github.String(fmt.Sprintf("Update %s to version %s", chartName, newVersion)),
+		Tree:    newTree,
+		Parents: []*github.Commit{{SHA: &parentSHA}},
+	})
+	if err != nil {
+		fmt.Printf("error creating commit: %v", err)
+		return err
+	}
+
+	// Create a new reference for the updated commit
+	newBranch := fmt.Sprintf("refs/heads/update-%s-to-%s", chartName, newVersion)
+	_, _, err = client.Git.CreateRef(ctx, owner, repo, &github.Reference{
+		Ref:    github.String(newBranch),
+		Object: &github.GitObject{SHA: newCommit.SHA},
+	})
+	if err != nil {
+		fmt.Printf("error creating reference: %v", err)
+		return err
+	}
+
+	// Create a pull request with the changes
+	title := fmt.Sprintf("Update %s to version %s", chartName, newVersion)
+	body := fmt.Sprintf("Update %s to version %s", chartName, newVersion)
+	newPR, _, err := client.PullRequests.Create(ctx, owner, repo, &github.NewPullRequest{
+		Title: github.String(title),
+		Body:  github.String(body),
+		Head:  github.String(newBranch),
+		Base:  github.String(branch),
+	})
+	if err != nil {
+		fmt.Printf("failed to create pull request: %v", err)
+		return err
+	}
+
+	// Print the URL of the new pull request
+	fmt.Printf("Created pull request %s\n", newPR.GetHTMLURL())
+
+	return nil
 }
