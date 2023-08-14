@@ -1,6 +1,6 @@
 name: Integration Test
 on:
-  # push:
+  push:
   schedule:
     - cron: '0 8 * * *'
 jobs:
@@ -43,7 +43,7 @@ jobs:
               - bitnami/sealed-secrets-controller
             release_remove_string: sealed-secrets-
             chart_index_url: https://bitnami-labs.github.io/sealed-secrets/index.yaml
-            dockertagprefix: "v"
+            dockertagprefix: ""
 
           - chartName: democratic-csi
             valuesChartName: democratic_iscsi
@@ -186,15 +186,15 @@ jobs:
             release_remove_string: "nfs-subdir-external-provisioner-"
             dockertagoverride: v4.0.2
 
-          - chartName: nginx-ingress
+          - chartName: nginx-ingress-controller
             valuesChartName: nginxingress
             chartType: optional
             github_user: nginxinc
             github_repo: kubernetes-ingress
             images:
-              - nginx/nginx-ingress
+              - bitnami/nginx-ingress-controller
             release_remove_string: ""
-            chart_index_url: https://helm.nginx.com/stable/index.yaml
+            chart_index_url: https://charts.bitnami.com/bitnami/index.yaml
 
           - chartName: nzbget
             chartType: optional

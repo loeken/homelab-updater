@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -77,13 +78,14 @@ func main() {
 	fmt.Println("current chart version my repo: " + oldChartVersion)
 
 	fmt.Println(app_version)
-	fmt.Println(extractVersion(app_version))
+	fmt.Println(oldChartVersion + "compare" + chartInfo.Version)
+
 	if compareVersions(oldChartVersion, chartInfo.Version) < 0 {
 		fmt.Println("new version found of chart")
 		if compareVersions(chart_app_version, app_version) < 0 {
 			if selfManagedImage == "true" {
 				fmt.Println("new version found of self managed app found")
-				os.Exit(1)
+
 				err := UpdateChartVersion(
 					chartName,
 					"loeken",
@@ -101,7 +103,7 @@ func main() {
 			}
 			if selfManagedChart == "true" {
 				fmt.Println("new version found of self managed chart found")
-				os.Exit(1)
+
 				err4 := UpdateHelmChartVersionsWithPR(
 					chartName,
 					"loeken",
@@ -118,13 +120,13 @@ func main() {
 			}
 		}
 		// update homelab
-		err1 := UpdateTargetRevision(valuesChartName, "loeken", "homelab", "deploy/argocd/bootstrap-optional-apps/templates/"+valuesChartName+".yaml", valuesChartName, "chartVersion", extractVersion(app_version), "main", token)
+		err1 := UpdateTargetRevision(valuesChartName, "loeken", "homelab", "deploy/argocd/bootstrap-optional-apps/templates/"+valuesChartName+".yaml", extractVersion(chartInfo.Version), "main", token)
 		if err1 != nil {
 			fmt.Println("error encountered: ", err1)
 		}
 
 		// update values in this repo
-		err2 := UpdateChartVersionWithPR(valuesChartName, "loeken", "homelab-updater", "values-optional.yaml", valuesChartName, "chartVersion", extractVersion(app_version), "main", token)
+		err2 := UpdateChartVersionWithPR(valuesChartName, "loeken", "homelab-updater", "values-optional.yaml", valuesChartName, "chartVersion", extractVersion(chartInfo.Version), "main", token)
 		if err2 != nil {
 			fmt.Println("error encountered: ", err2)
 		}
@@ -651,7 +653,8 @@ func UpdateHelmChartVersionsWithPR(chartName, owner, repo, filename, newVersion,
 
 	return nil
 }
-func UpdateTargetRevision(chartName, owner, repo, filename, parentBlock, subBlock, newVersion, branch, token string) error {
+
+func UpdateTargetRevision(chartName, owner, repo, filename, newVersion, branch, token string) error {
 	ctx := context.Background()
 
 	ts := oauth2.StaticTokenSource(
@@ -666,53 +669,61 @@ func UpdateTargetRevision(chartName, owner, repo, filename, parentBlock, subBloc
 		Ref: branch,
 	})
 	if err != nil {
-		fmt.Println("error getting file content:", err)
-		return err
+		return fmt.Errorf("error getting file content: %v", err)
 	}
 
 	// Decode the file content from base64
 	contentBytes, err := fileContent.GetContent()
 	if err != nil {
-		fmt.Printf("error decoding file content: %v", err)
-		return err
+		return fmt.Errorf("error decoding file content: %v", err)
 	}
-
-	// Convert contentBytes to a byte slice
 	content := []byte(contentBytes)
 
-	// Unmarshal the YAML content into a map
+	// Strip helm template wrappers and capture them
+	re := regexp.MustCompile(`(?s)({{.*?}})\n(.+?)\n({{.*?}})`)
+	matches := re.FindSubmatch(content)
+	if matches == nil || len(matches) < 4 {
+		return errors.New("couldn't find the expected YAML section")
+	}
+	beginWrapper := matches[1] // {{ if .Values.certmanager.enabled }}
+	strippedContent := matches[2]
+	endWrapper := matches[3] // {{ end }}
+
+	// Unmarshal the stripped YAML content into a map
 	values := make(map[interface{}]interface{})
-	if err := yaml.Unmarshal(content, &values); err != nil {
-		fmt.Printf("error unmarshalling YAML: %v", err)
-		return err
+	if err := yaml.Unmarshal(strippedContent, &values); err != nil {
+		return fmt.Errorf("error unmarshalling YAML: %v", err)
 	}
 
-	// Update the targetRevision using nested blocks
-	sourceBlock := values[parentBlock].(map[interface{}]interface{})["source"].(map[interface{}]interface{})
-	sourceBlock[subBlock] = newVersion
+	// Update the targetRevision
+	sourceBlock := values["spec"].(map[interface{}]interface{})["source"].(map[interface{}]interface{})
+	sourceBlock["targetRevision"] = newVersion
 
 	// Marshal the updated values back to YAML
 	updatedContent, err := yaml.Marshal(values)
 	if err != nil {
-		fmt.Printf("error marshalling YAML: %v", err)
-		return err
+		return fmt.Errorf("error marshalling YAML: %v", err)
 	}
 
-	// Create a new blob object for the updated content
+	// Re-add the wrappers to the updated content
+	finalContent := append(beginWrapper, '\n')
+	finalContent = append(finalContent, updatedContent...)
+	finalContent = append(finalContent, '\n')
+	finalContent = append(finalContent, endWrapper...)
+
+	// Create a new blob object for the updated content using the finalContent
 	newBlob, _, err := client.Git.CreateBlob(ctx, owner, repo, &github.Blob{
-		Content:  github.String(string(updatedContent)),
+		Content:  github.String(string(finalContent)),
 		Encoding: github.String("utf-8"),
 	})
 	if err != nil {
-		fmt.Println("Error creating blob: ", err)
-		return err
+		return fmt.Errorf("Error creating blob: %v", err)
 	}
 
 	// Get the latest commit object for the branch
 	ref, _, err := client.Git.GetRef(ctx, owner, repo, fmt.Sprintf("refs/heads/%s", branch))
 	if err != nil {
-		fmt.Printf("error getting ref: %v", err)
-		return err
+		return fmt.Errorf("error getting ref: %v", err)
 	}
 	parentSHA := ref.Object.GetSHA()
 
@@ -726,8 +737,7 @@ func UpdateTargetRevision(chartName, owner, repo, filename, parentBlock, subBloc
 		},
 	})
 	if err != nil {
-		fmt.Printf("error creating tree: %v", err)
-		return err
+		return fmt.Errorf("error creating tree: %v", err)
 	}
 
 	// Create a new commit object with the updated tree object
@@ -737,8 +747,7 @@ func UpdateTargetRevision(chartName, owner, repo, filename, parentBlock, subBloc
 		Parents: []*github.Commit{{SHA: &parentSHA}},
 	})
 	if err != nil {
-		fmt.Printf("error creating commit: %v", err)
-		return err
+		return fmt.Errorf("error creating commit: %v", err)
 	}
 
 	// Create a new reference for the updated commit
@@ -748,8 +757,7 @@ func UpdateTargetRevision(chartName, owner, repo, filename, parentBlock, subBloc
 		Object: &github.GitObject{SHA: newCommit.SHA},
 	})
 	if err != nil {
-		fmt.Printf("error creating reference: %v", err)
-		return err
+		return fmt.Errorf("error creating reference: %v", err)
 	}
 
 	// Create a pull request with the changes
@@ -762,8 +770,7 @@ func UpdateTargetRevision(chartName, owner, repo, filename, parentBlock, subBloc
 		Base:  github.String(branch),
 	})
 	if err != nil {
-		fmt.Printf("failed to create pull request: %v", err)
-		return err
+		return fmt.Errorf("failed to create pull request: %v", err)
 	}
 
 	// Print the URL of the new pull request
