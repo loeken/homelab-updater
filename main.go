@@ -651,7 +651,7 @@ func UpdateHelmChartVersionsWithPR(chartName, owner, repo, filename, newVersion,
 
 	return nil
 }
-func UpdateTargetRevision(chartName, owner, repo, filename, parentBlock, nestedBlock, subBlock, newVersion, branch, token string) error {
+func UpdateTargetRevision(chartName, owner, repo, filename, parentBlock, subBlock, newVersion, branch, token string) error {
 	ctx := context.Background()
 
 	ts := oauth2.StaticTokenSource(
@@ -687,8 +687,8 @@ func UpdateTargetRevision(chartName, owner, repo, filename, parentBlock, nestedB
 		return err
 	}
 
-	// Update the targetRevision
-	sourceBlock := values[parentBlock].(map[interface{}]interface{})[nestedBlock].(map[interface{}]interface{})
+	// Update the targetRevision using nested blocks
+	sourceBlock := values[parentBlock].(map[interface{}]interface{})["source"].(map[interface{}]interface{})
 	sourceBlock[subBlock] = newVersion
 
 	// Marshal the updated values back to YAML
