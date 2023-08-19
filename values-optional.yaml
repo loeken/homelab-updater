@@ -29,7 +29,7 @@ democratic_nfs:
   enabled: false
 domain: example.com
 externaldns:
-  chartVersion: 6.23.3
+  chartVersion: 6.23.6
   enabled: false
 githubRepo: homelab-example
 githubUser: loeken
@@ -111,7 +111,7 @@ loki:
   storageClass: local-path
   storageSize: 10Gi
 nextcloud:
-  chartVersion: 3.5.22
+  chartVersion: 4.0.0
   data:
     size: 10Gi
     storageClass: local-path
@@ -134,7 +134,7 @@ nfsprovisioner:
   enabled: true
   ip: 172.16.137.200
 nginxingress:
-  chartVersion: 9.7.7
+  chartVersion: 9.7.8
   enabled: false
 nzbget:
   chartVersion: 1.3.2
