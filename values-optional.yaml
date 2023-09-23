@@ -71,7 +71,7 @@ jellyseerr:
   storageClass: local-path
   useAuthelia: false
 k10:
-  chartVersion: 6.0.7
+  chartVersion: 6.0.8
   enabled: false
   storageClass: local-path
 linkerd:
