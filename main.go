@@ -45,7 +45,7 @@ func main() {
 	valuesChartName := os.Getenv("INPUT_VALUES_CHART_NAME")
 	oldChartVersion := os.Getenv("INPUT_CHART_VERSION")
 	// remoteChartName := os.Getenv("INPUT_REMOTE_CHART_NAME")
-	// chartType := os.Getenv("INPUT_CHART_TYPE")
+	chartType := os.Getenv("INPUT_CHART_TYPE")
 	releaseRemoveString := os.Getenv("INPUT_RELEASE_REMOVE_STRING")
 
 	selfManagedImage := os.Getenv("INPUT_SELF_MANAGED_IMAGE")
@@ -120,7 +120,7 @@ func main() {
 			}
 		}
 		// update homelab
-		err1 := UpdateTargetRevision(valuesChartName, "loeken", "homelab", "deploy/argocd/bootstrap-optional-apps/templates/"+valuesChartName+".yaml", extractVersion(chartInfo.Version), "main", token)
+		err1 := UpdateTargetRevision(valuesChartName, "loeken", "homelab", "deploy/argocd/bootstrap-" + chartType + "-apps/templates/"+valuesChartName+".yaml", extractVersion(chartInfo.Version), "main", token)
 		if err1 != nil {
 			fmt.Println("error encountered: ", err1)
 		}
