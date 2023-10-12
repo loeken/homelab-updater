@@ -126,7 +126,7 @@ func main() {
 		}
 
 		// update values in this repo
-		err2 := UpdateChartVersionWithPR(valuesChartName, "loeken", "homelab-updater", "values-optional.yaml", valuesChartName, "chartVersion", extractVersion(chartInfo.Version), "main", token)
+		err2 := UpdateChartVersionWithPR(valuesChartName, "loeken", "homelab-updater", "values-" + chartType + ".yaml", valuesChartName, "chartVersion", extractVersion(chartInfo.Version), "main", token)
 		if err2 != nil {
 			fmt.Println("error encountered: ", err2)
 		}
