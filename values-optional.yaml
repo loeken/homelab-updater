@@ -29,7 +29,7 @@ democratic_nfs:
   enabled: false
 domain: example.com
 externaldns:
-  chartVersion: 6.26.5
+  chartVersion: 6.28.5
   enabled: false
 githubRepo: homelab-example
 githubUser: loeken
