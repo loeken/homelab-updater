@@ -22,7 +22,7 @@ cloudflaretunnel:
   enabled: false
 clusterIssuer: letsencrypt-staging
 democratic_iscsi:
-  chartVersion: 0.14.2
+  chartVersion: 0.14.3
   enabled: false
 democratic_nfs:
   chartVersion: 0.14.2
