@@ -2,4 +2,4 @@ email: youremail@example.com
 githubRepo: homelab-example
 githubUser: loeken
 sealedsecrets:
-  chartVersion: 2.13.3
+  chartVersion: 2.14.0
