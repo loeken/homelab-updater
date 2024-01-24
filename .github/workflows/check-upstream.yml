@@ -47,28 +47,6 @@ jobs:
             chart_index_url: https://bitnami-labs.github.io/sealed-secrets/index.yaml
             dockertagprefix: ""
 
-          # - chartName: democratic-csi
-          #   valuesChartName: democratic_iscsi
-          #   chartType: optional
-          #   github_user: democratic-csi
-          #   github_repo: democratic-csi
-          #   images:
-          #     - democraticcsi/democratic-csi
-          #   release_remove_string: democratic-csi-
-          #   chart_index_url: https://democratic-csi.github.io/charts/index.yaml
-          #   dockertagprefix: "v"
-
-          # - chartName: democratic-csi
-          #   valuesChartName: democratic_nfs
-          #   chartType: optional
-          #   github_user: democratic-csi
-          #   github_repo: democratic-csi
-          #   images:
-          #     - democraticcsi/democratic-csi
-          #   release_remove_string: democratic-csi-
-          #   chart_index_url: https://democratic-csi.github.io/charts/index.yaml
-          #   dockertagprefix: "v"
-
           # - chartName: home-assistant
           #   chartType: optional
           #   valuesChartName: ha
