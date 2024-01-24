@@ -655,6 +655,8 @@ func UpdateHelmChartVersionsWithPR(chartName, owner, repo, filename, newVersion,
 }
 
 func UpdateTargetRevision(chartName, owner, repo, filename, newVersion, branch, token string) error {
+	fmt.Println("foobar here")
+	fmt.Println(chartName, owner, repo, filename, newVersion, branch)
 	ctx := context.Background()
 
 	ts := oauth2.StaticTokenSource(
