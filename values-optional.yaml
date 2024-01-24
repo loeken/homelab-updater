@@ -16,7 +16,7 @@ authelia:
     username: authelia@example.com
   storageClass: local-path
 certmanager:
-  chartVersion: 1.13.2
+  chartVersion: 1.13.3
   enabled: false
 cloudflaretunnel:
   enabled: false
