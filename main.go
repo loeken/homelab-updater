@@ -80,45 +80,67 @@ func main() {
 	fmt.Println(app_version)
 	fmt.Println(oldChartVersion + "compare" + chartInfo.Version)
 
-	if compareVersions(oldChartVersion, chartInfo.Version) < 0 {
-		fmt.Println("new version found of chart")
-		if compareVersions(chart_app_version, app_version) < 0 {
-			if selfManagedImage == "true" {
-				fmt.Println("new version found of self managed app found")
+	// if compareVersions(chart_app_version, app_version) < 0 {
+	// 	info := chartName + " app_version not matching chart_app_version want: " + app_version
+	// 	slackWebhookURL := os.Getenv("SLACK_WEBHOOK_URL")
+	// 	if err := sendSlackNotification(slackWebhookURL, info); err != nil {
+	// 		fmt.Printf("Failed to send Slack notification: %v\n", err)
+	// 	}
+	// 	os.Exit(1)
+	// }
+	if compareVersions(chart_app_version, app_version) < 0 {
+		if selfManagedImage == "true" {
+			fmt.Println("new version found of self managed app found")
 
-				err := UpdateChartVersion(
-					chartName,
-					"loeken",
-					"docker-"+valuesChartName,
-					"version.yaml",
-					"env",
-					"version",
-					app_version,
-					"main",
-					token,
-				)
-				if err != nil {
-					fmt.Println("error encountered: ", err)
-				}
+			err := UpdateChartVersion(
+				chartName,
+				"loeken",
+				"docker-"+valuesChartName,
+				"version.yaml",
+				"env",
+				"version",
+				app_version,
+				"main",
+				token,
+			)
+			if err != nil {
+				fmt.Println("error encountered: ", err)
 			}
-			if selfManagedChart == "true" {
-				fmt.Println("new version found of self managed chart found")
-
-				err4 := UpdateHelmChartVersionsWithPR(
-					chartName,
-					"loeken",
-					"helm-charts",
-					"charts/"+chartName+"/Chart.yaml",
-					extractVersion(app_version),
-					app_version,
-					"main",
-					token,
-				)
-				if err4 != nil {
-					fmt.Println("error encountered: ", err4)
-				}
+			info := chartName + " new version for image!"
+			slackWebhookURL := os.Getenv("SLACK_WEBHOOK_URL")
+			if err := sendSlackNotification(slackWebhookURL, info); err != nil {
+				fmt.Printf("Failed to send Slack notification: %v\n", err)
 			}
 		}
+		if selfManagedChart == "true" {
+			fmt.Println("new version found of self managed chart found")
+
+			err4 := UpdateHelmChartVersionsWithPR(
+				chartName,
+				"loeken",
+				"helm-charts",
+				"charts/"+chartName+"/Chart.yaml",
+				extractVersion(app_version),
+				app_version,
+				"main",
+				token,
+			)
+			if err4 != nil {
+				fmt.Println("error encountered: ", err4)
+			}
+			// prMessage := fmt.Sprintf("updated helm charts: https://github.com/loeken/helm-charts/pulls")
+	
+			// // Send a Slack notification
+			// slackWebhookURL := os.Getenv("SLACK_WEBHOOK_URL") // Make sure this environment variable is set in your GitHub Action
+			// if err := sendSlackNotification(slackWebhookURL, prMessage); err != nil {
+			// 	fmt.Printf("Failed to send Slack notification: %v\n", err)
+			// }
+		}
+		
+	}
+	if compareVersions(oldChartVersion, chartInfo.Version) < 0 {
+		fmt.Println("new version found of chart")
+		
 		// update homelab
 		err1 := UpdateTargetRevision(valuesChartName, "loeken", "homelab", "deploy/argocd/bootstrap-" + chartType + "-apps/templates/"+valuesChartName+".yaml", extractVersion(chartInfo.Version), "main", token)
 		if err1 != nil {
@@ -126,11 +148,20 @@ func main() {
 		}
 
 		// update values in this repo
+		fmt.Println("lets goo 2")
+		fmt.Println(valuesChartName, "loeken", "homelab-updater", "values-" + chartType + ".yaml", valuesChartName, "chartVersion", extractVersion(chartInfo.Version), "main", token)
 		err2 := UpdateChartVersionWithPR(valuesChartName, "loeken", "homelab-updater", "values-" + chartType + ".yaml", valuesChartName, "chartVersion", extractVersion(chartInfo.Version), "main", token)
 		if err2 != nil {
 			fmt.Println("error encountered: ", err2)
 		}
 
+		prMessage := fmt.Sprintf("Created pull request https://github.com/loeken/homelab/pulls & https://github.com/loeken/homelab-updater/pulls ")
+	
+		// Send a Slack notification
+		slackWebhookURL := os.Getenv("SLACK_WEBHOOK_URL") // Make sure this environment variable is set in your GitHub Action
+		if err := sendSlackNotification(slackWebhookURL, prMessage); err != nil {
+			fmt.Printf("Failed to send Slack notification: %v\n", err)
+		}
 		os.Exit(1)
 	} else {
 		fmt.Println("chart is up2date")
@@ -416,6 +447,22 @@ func UpdateChartVersionWithPR(chartName, owner, repo, filename, parentBlock, sub
 		return err
 	}
 
+	parent, ok := values[parentBlock]
+    if !ok {
+        // Handle the case where the parent block does not exist. You might want to create it or return an error.
+        fmt.Printf("Parent block %s does not exist in YAML\n", parentBlock)
+        return fmt.Errorf("parent block %s does not exist in YAML", parentBlock)
+    }
+
+    // Check if the parent is of type map[interface{}]interface{}
+    parentMap, ok := parent.(map[interface{}]interface{})
+    if !ok {
+        // Handle the case where the parent block is not a map. This could indicate a malformed YAML or an unexpected structure.
+        fmt.Printf("Parent block %s is not a map\n", parentBlock)
+        return fmt.Errorf("parent block %s is not a map", parentBlock)
+    }
+	parentMap[subBlock] = newVersion
+
 	// Update the chart version
 	values[parentBlock].(map[interface{}]interface{})[subBlock] = newVersion
 	//values[parentBlock].(map[string]interface{})[subBlock] = newVersion
@@ -426,7 +473,7 @@ func UpdateChartVersionWithPR(chartName, owner, repo, filename, parentBlock, sub
 		fmt.Printf("error marshalling YAML: %v", err)
 		return err
 	}
-	fmt.Println(updatedContent)
+	// fmt.Println(updatedContent)
 	// Create a new blob object for the updated content
 	newBlob, _, err := client.Git.CreateBlob(ctx, owner, repo, &github.Blob{
 		Content:  github.String(string(updatedContent)),
@@ -648,8 +695,16 @@ func UpdateHelmChartVersionsWithPR(chartName, owner, repo, filename, newVersion,
 		return err
 	}
 
-	// Print the URL of the new pull request
-	fmt.Printf("Created pull request %s\n", newPR.GetHTMLURL())
+
+	// Print the URL of the new pull request and send a notification to Slack
+	prMessage := fmt.Sprintf("Created pull request %s\n", newPR.GetHTMLURL())
+	fmt.Print(prMessage)
+
+	// Send a Slack notification
+	slackWebhookURL := os.Getenv("SLACK_WEBHOOK_URL") // Make sure this environment variable is set in your GitHub Action
+	if err := sendSlackNotification(slackWebhookURL, prMessage); err != nil {
+		fmt.Printf("Failed to send Slack notification: %v\n", err)
+	}
 
 	return nil
 }
@@ -777,6 +832,33 @@ func UpdateTargetRevision(chartName, owner, repo, filename, newVersion, branch, 
 
 	// Print the URL of the new pull request
 	fmt.Printf("Created pull request %s\n", newPR.GetHTMLURL())
+
+	return nil
+}
+func sendSlackNotification(webhookURL, message string) error {
+	payload := map[string]string{"text": message}
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("POST", webhookURL, bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		body, _ := ioutil.ReadAll(resp.Body)
+		return fmt.Errorf("received non-2xx response: %d, body: %s", resp.StatusCode, body)
+	}
 
 	return nil
 }

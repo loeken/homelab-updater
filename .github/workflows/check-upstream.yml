@@ -12,29 +12,29 @@ jobs:
       fail-fast: false
       matrix:
         repo:
-          # - chartName: authelia
-          #   valuesChartName: authelia
-          #   chartType: optional
-          #   github_user: authelia
-          #   github_repo: authelia
-          #   images:
-          #     - authelia/authelia
-          #   release_remove_string: authelia-
-          #   chart_index_url: https://charts.authelia.com/index.yaml
-          #   dockertagprefix: ""
+          - chartName: authelia
+            valuesChartName: authelia
+            chartType: optional
+            github_user: authelia
+            github_repo: authelia
+            images:
+              - authelia/authelia
+            release_remove_string: authelia-
+            chart_index_url: https://charts.authelia.com/index.yaml
+            dockertagprefix: ""
 
-          # - chartName: cert-manager
-          #   valuesChartName: certmanager
-          #   chartType: optional
-          #   github_user: cert-manager
-          #   github_repo: cert-manager
-          #   images:
-          #     - quay.io/jetstack/cert-manager-cainjector
-          #     - quay.io/jetstack/cert-manager-controller
-          #     - quay.io/jetstack/cert-manager-webhook
-          #   release_remove_string: ""
-          #   chart_index_url: https://charts.jetstack.io/index.yaml
-          #   dockertagprefix: "v"
+          - chartName: cert-manager
+            valuesChartName: certmanager
+            chartType: optional
+            github_user: cert-manager
+            github_repo: cert-manager
+            images:
+              - quay.io/jetstack/cert-manager-cainjector
+              - quay.io/jetstack/cert-manager-controller
+              - quay.io/jetstack/cert-manager-webhook
+            release_remove_string: ""
+            chart_index_url: https://charts.jetstack.io/index.yaml
+            dockertagprefix: "v"
 
           - chartName: sealed-secrets
             valuesChartName: sealedsecrets
@@ -47,219 +47,219 @@ jobs:
             chart_index_url: https://bitnami-labs.github.io/sealed-secrets/index.yaml
             dockertagprefix: ""
 
-          # - chartName: home-assistant
-          #   chartType: optional
-          #   valuesChartName: ha
-          #   github_user: home-assistant
-          #   github_repo: core
-          #   images:
-          #     -  loeken/home-assistant
-          #   self_managed_image: 'true'
-          #   self_managed_chart: 'true'
-          #   remote_chart_name: home-assistant
-          #   # if unset it ll look at repo for last version
-          #   chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
-          #   dockertagprefix: ""
+          - chartName: home-assistant
+            chartType: optional
+            valuesChartName: home-assistant
+            github_user: home-assistant
+            github_repo: core
+            images:
+              -  loeken/home-assistant
+            self_managed_image: 'true'
+            self_managed_chart: 'true'
+            remote_chart_name: home-assistant
+            # if unset it ll look at repo for last version
+            chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
+            dockertagprefix: ""
 
-          # - chartName: external-dns
-          #   chartType: optional
-          #   valuesChartName: externaldns
-          #   github_user: kubernetes-sigs
-          #   github_repo: external-dns
-          #   images:
-          #     -  bitnami/external-dns
-          #   chart_index_url: https://charts.bitnami.com/bitnami/index.yaml
-          #   dockertagprefix: ""
+          - chartName: external-dns
+            chartType: optional
+            valuesChartName: externaldns
+            github_user: kubernetes-sigs
+            github_repo: external-dns
+            images:
+              -  bitnami/external-dns
+            chart_index_url: https://charts.bitnami.com/bitnami/index.yaml
+            dockertagprefix: ""
 
-          # - chartName: jellyfin
-          #   chartType: optional
-          #   valuesChartName: jellyfin
-          #   github_user: jellyfin
-          #   github_repo: jellyfin
-          #   self_managed_image: 'true'
-          #   self_managed_chart: 'true'
-          #   images:
-          #     -  loeken/jellyfin
-          #   chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
-          #   dockertagprefix: ""
-          #   remote_chart_name: jellyfin
+          - chartName: jellyfin
+            chartType: optional
+            valuesChartName: jellyfin
+            github_user: jellyfin
+            github_repo: jellyfin
+            self_managed_image: 'true'
+            self_managed_chart: 'true'
+            images:
+              -  loeken/jellyfin
+            chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
+            dockertagprefix: ""
+            remote_chart_name: jellyfin
 
-          # - chartName: jellyseerr
-          #   chartType: optional
-          #   valuesChartName: jellyseerr
-          #   github_user: Fallenbagel
-          #   github_repo: jellyseerr
-          #   self_managed_image: 'true'
-          #   self_managed_chart: 'true'
-          #   images:
-          #     -  loeken/jellyseerr
-          #   chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
-          #   dockertagprefix: ""
-          #   remote_chart_name: jellyseer
+          - chartName: jellyseerr
+            chartType: optional
+            valuesChartName: jellyseerr
+            github_user: Fallenbagel
+            github_repo: jellyseerr
+            self_managed_image: 'true'
+            self_managed_chart: 'true'
+            images:
+              -  loeken/jellyseerr
+            chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
+            dockertagprefix: ""
+            remote_chart_name: jellyseer
 
-          # - chartName: k10
-          #   chartType: optional
-          #   valuesChartName: k10
-          #   github_user: kasten-io
-          #   github_repo: k10
-          #   self_managed_image: 'true'
-          #   self_managed_chart: 'true'
-          #   images:
-          #     - gcr.io/kasten-images/init
-          #     - gcr.io/kasten-images/grafana
-          #     - gcr.io/kasten-images/configmap-reload
-          #     - gcr.io/kasten-images/prometheus
-          #     - gcr.io/kasten-images/auth
-          #     - gcr.io/kasten-images/upgrade
-          #     - gcr.io/kasten-images/catalog
-          #     # - ghcr.io/kanisterio/kanister-tools
-          #     - gcr.io/kasten-images/controllermanager
-          #     - gcr.io/kasten-images/crypto
-          #     - gcr.io/kasten-images/events
-          #     - gcr.io/kasten-images/garbagecollector
-          #     - gcr.io/kasten-images/bloblifecyclemanager
-          #     - gcr.io/kasten-images/vbrintegrationapi
-          #     - gcr.io/kasten-images/executor
-          #     - gcr.io/kasten-images/cephtool
-          #     - gcr.io/kasten-images/jobs
-          #     - gcr.io/kasten-images/logging
-          #     - gcr.io/kasten-images/metering
-          #     - gcr.io/kasten-images/state
-          #     - gcr.io/kasten-images/admin
-          #     - gcr.io/kasten-images/aggregatedapis
-          #     - gcr.io/kasten-images/frontend
-          #     - gcr.io/kasten-images/kanister
-          #     - gcr.io/kasten-images/emissary
-          #   chart_index_url: https://charts.kasten.io/index.yaml
-          #   dockertagprefix: ""
+          - chartName: k10
+            chartType: optional
+            valuesChartName: k10
+            github_user: kasten-io
+            github_repo: k10
+            self_managed_image: 'true'
+            self_managed_chart: 'true'
+            images:
+              - gcr.io/kasten-images/init
+              - gcr.io/kasten-images/grafana
+              - gcr.io/kasten-images/configmap-reload
+              - gcr.io/kasten-images/prometheus
+              - gcr.io/kasten-images/auth
+              - gcr.io/kasten-images/upgrade
+              - gcr.io/kasten-images/catalog
+              # - ghcr.io/kanisterio/kanister-tools
+              - gcr.io/kasten-images/controllermanager
+              - gcr.io/kasten-images/crypto
+              - gcr.io/kasten-images/events
+              - gcr.io/kasten-images/garbagecollector
+              - gcr.io/kasten-images/bloblifecyclemanager
+              - gcr.io/kasten-images/vbrintegrationapi
+              - gcr.io/kasten-images/executor
+              - gcr.io/kasten-images/cephtool
+              - gcr.io/kasten-images/jobs
+              - gcr.io/kasten-images/logging
+              - gcr.io/kasten-images/metering
+              - gcr.io/kasten-images/state
+              - gcr.io/kasten-images/admin
+              - gcr.io/kasten-images/aggregatedapis
+              - gcr.io/kasten-images/frontend
+              - gcr.io/kasten-images/kanister
+              - gcr.io/kasten-images/emissary
+            chart_index_url: https://charts.kasten.io/index.yaml
+            dockertagprefix: ""
 
-          # - chartName: loki-stack
-          #   chartType: optional
-          #   valuesChartName: loki
-          #   github_user: grafana
-          #   github_repo: loki
-          #   images:
-          #     -  grafana/loki
-          #   chart_index_url: https://grafana.github.io/helm-charts/index.yaml
-          #   dockertagprefix: ""
+          - chartName: loki-stack
+            chartType: optional
+            valuesChartName: loki
+            github_user: grafana
+            github_repo: loki
+            images:
+              -  grafana/loki
+            chart_index_url: https://grafana.github.io/helm-charts/index.yaml
+            dockertagprefix: ""
 
-          # - chartName: nextcloud
-          #   chartType: optional
-          #   valuesChartName: nextcloud
-          #   github_user: nextcloud
-          #   github_repo: nextcloud
-          #   images:
-          #     - nextcloud
-          #   chart_index_url: https://nextcloud.github.io/helm/index.yaml
-          #   dockertagprefix: ""
-          #   dockertagoverride: 27.0.1-fpm-alpine
+          - chartName: nextcloud
+            chartType: optional
+            valuesChartName: nextcloud
+            github_user: nextcloud
+            github_repo: nextcloud
+            images:
+              - nextcloud
+            chart_index_url: https://nextcloud.github.io/helm/index.yaml
+            dockertagprefix: ""
+            dockertagoverride: 27.0.1-fpm-alpine
 
-          # - chartName: nfs-subdir-external-provisioner
-          #   chartType: optional
-          #   valuesChartName: nfsprovisioner
-          #   github_user: kubernetes-sigs
-          #   github_repo: nfs-subdir-external-provisioner
-          #   images:
-          #     -  registry.k8s.io/sig-storage/nfs-subdir-external-provisioner
-          #   chart_index_url: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/index.yaml
-          #   dockertagprefix: ""
-          #   release_remove_string: "nfs-subdir-external-provisioner-"
-          #   dockertagoverride: v4.0.2
+          - chartName: nfs-subdir-external-provisioner
+            chartType: optional
+            valuesChartName: nfsprovisioner
+            github_user: kubernetes-sigs
+            github_repo: nfs-subdir-external-provisioner
+            images:
+              -  registry.k8s.io/sig-storage/nfs-subdir-external-provisioner
+            chart_index_url: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/index.yaml
+            dockertagprefix: ""
+            release_remove_string: "nfs-subdir-external-provisioner-"
+            dockertagoverride: v4.0.2
 
-          # - chartName: nginx-ingress-controller
-          #   valuesChartName: nginxingress
-          #   chartType: optional
-          #   github_user: nginxinc
-          #   github_repo: kubernetes-ingress
-          #   images:
-          #     - bitnami/nginx-ingress-controller
-          #   release_remove_string: ""
-          #   chart_index_url: https://charts.bitnami.com/bitnami/index.yaml
+          - chartName: nginx-ingress-controller
+            valuesChartName: nginxingress
+            chartType: optional
+            github_user: nginxinc
+            github_repo: kubernetes-ingress
+            images:
+              - bitnami/nginx-ingress-controller
+            release_remove_string: ""
+            chart_index_url: https://charts.bitnami.com/bitnami/index.yaml
 
-          # - chartName: nzbget
-          #   chartType: optional
-          #   valuesChartName: nzbget
-          #   github_user: nzbget
-          #   github_repo: nzbget
-          #   self_managed_image: 'true'
-          #   self_managed_chart: 'true'
-          #   images:
-          #     -  loeken/nzbget
-          #   chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
-          #   dockertagprefix: version-v
+          - chartName: nzbget
+            chartType: optional
+            valuesChartName: nzbget
+            github_user: nzbget
+            github_repo: nzbget
+            self_managed_image: 'true'
+            self_managed_chart: 'true'
+            images:
+              -  loeken/nzbget
+            chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
+            dockertagprefix: version-v
   
-          # - chartName: prowlarr
-          #   chartType: optional
-          #   valuesChartName: prowlarr
-          #   github_user: Prowlarr
-          #   github_repo: Prowlarr
-          #   self_managed_image: 'true'
-          #   self_managed_chart: 'true'
-          #   images:
-          #     -  loeken/prowlarr
-          #   chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
-          #   release_remove_string: develop-version-
+          - chartName: prowlarr
+            chartType: optional
+            valuesChartName: prowlarr
+            github_user: Prowlarr
+            github_repo: Prowlarr
+            self_managed_image: 'true'
+            self_managed_chart: 'true'
+            images:
+              -  loeken/prowlarr
+            chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
+            release_remove_string: develop-version-
 
-          # - chartName: radarr
-          #   chartType: optional
-          #   valuesChartName: radarr
-          #   github_user: Radarr
-          #   github_repo: Radarr
-          #   self_managed_image: 'true'
-          #   self_managed_chart: 'true'
-          #   images:
-          #     -  loeken/radarr
-          #   chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
-          #   dockertagprefix: version-
-          #   release_remove_string: version-
+          - chartName: radarr
+            chartType: optional
+            valuesChartName: radarr
+            github_user: Radarr
+            github_repo: Radarr
+            self_managed_image: 'true'
+            self_managed_chart: 'true'
+            images:
+              -  loeken/radarr
+            chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
+            dockertagprefix: version-
+            release_remove_string: version-
           
-          # - chartName: rtorrent-flood
-          #   chartType: optional
-          #   valuesChartName: rtorrentflood
-          #   github_user: jesec
-          #   github_repo: flood
-          #   self_managed_image: 'true'
-          #   self_managed_chart: 'true'
-          #   images:
-          #     -  loeken/rtorrent-flood
-          #   chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
-          #   release_remove_string: version-
+          - chartName: rtorrent-flood
+            chartType: optional
+            valuesChartName: rtorrentflood
+            github_user: jesec
+            github_repo: flood
+            self_managed_image: 'true'
+            self_managed_chart: 'true'
+            images:
+              -  loeken/rtorrent-flood
+            chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
+            release_remove_string: version-
 
-          # - chartName: sonarr
-          #   chartType: optional
-          #   valuesChartName: sonarr
-          #   github_user: Sonarr
-          #   github_repo: Sonarr
-          #   self_managed_image: 'true'
-          #   self_managed_chart: 'true'
-          #   images:
-          #     -  loeken/sonarr
-          #   chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
-          #   dockertagoverride: release-3.0.9.1549
-          #   release_remove_string: release-
+          - chartName: sonarr
+            chartType: optional
+            valuesChartName: sonarr
+            github_user: Sonarr
+            github_repo: Sonarr
+            self_managed_image: 'true'
+            self_managed_chart: 'true'
+            images:
+              -  loeken/sonarr
+            chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
+            #dockertagoverride: release-3.0.9.1549
+            release_remove_string: release-
 
-          # - chartName: vaultwarden
-          #   chartType: optional
-          #   valuesChartName: vaultwarden
-          #   github_user: dani-garcia
-          #   github_repo: vaultwarden
-          #   self_managed_image: 'true'
-          #   self_managed_chart: 'true'
-          #   images:
-          #     -  loeken/vaultwarden
-          #   chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
-          #   release_remove_string: -alpine
-          #   dockertagsuffix: "-alpine"
+          - chartName: vaultwarden
+            chartType: optional
+            valuesChartName: vaultwarden
+            github_user: dani-garcia
+            github_repo: vaultwarden
+            self_managed_image: 'true'
+            self_managed_chart: 'true'
+            images:
+              -  loeken/vaultwarden
+            chart_index_url: "https://loeken.github.io/helm-charts/index.yaml"
+            release_remove_string: -alpine
+            dockertagsuffix: "-alpine"
 
-          # - chartName: whoami
-          #   chartType: optional
-          #   valuesChartName: whoami
-          #   github_user: traefik
-          #   github_repo: whoami
-          #   images:
-          #     -  traefik/whoami
-          #   chart_index_url: https://cowboysysop.github.io/charts/index.yaml
-          #   dockertagprefix: ""
+          - chartName: whoami
+            chartType: optional
+            valuesChartName: whoami
+            github_user: traefik
+            github_repo: whoami
+            images:
+              -  traefik/whoami
+            chart_index_url: https://cowboysysop.github.io/charts/index.yaml
+            dockertagprefix: ""
     steps:
 
       - uses: actions/checkout@main
@@ -300,6 +300,7 @@ jobs:
           dockertagsuffix: ${{ matrix.repo.dockertagsuffix }}
         env:
           GITHUB_ENV: ${{ github.workspace }}/.env
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Read output file
         id: read_output
