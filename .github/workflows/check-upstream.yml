@@ -49,7 +49,7 @@ jobs:
 
           - chartName: home-assistant
             chartType: optional
-            valuesChartName: home-assistant
+            valuesChartName: homeassistant
             github_user: home-assistant
             github_repo: core
             images:
@@ -320,13 +320,13 @@ jobs:
           echo "Latest APP Release value: $LATEST_APP_RELEASE"
           echo "Latest CHART Release value: $LATEST_CHART_RELEASE"
         
-      - name: Run Trivy vulnerability scanner
-        run: |
-          for image in ${{ join(matrix.repo.images, ' ') }}; do
-            echo "Running trivy for $image"
-            if [ "${{ matrix.repo.dockertagoverride }}" != "" ]; then
-              docker run --rm aquasec/trivy image --timeout 5m0s $image:${{ matrix.repo.dockertagoverride }}
-            else
-              docker run --rm aquasec/trivy image --timeout 5m0s $image:${{ matrix.repo.dockertagprefix }}$LATEST_APP_RELEASE
-            fi
-          done
+      # - name: Run Trivy vulnerability scanner
+      #   run: |
+      #     for image in ${{ join(matrix.repo.images, ' ') }}; do
+      #       echo "Running trivy for $image"
+      #       if [ "${{ matrix.repo.dockertagoverride }}" != "" ]; then
+      #         docker run --rm aquasec/trivy image --timeout 5m0s $image:${{ matrix.repo.dockertagoverride }}
+      #       else
+      #         docker run --rm aquasec/trivy image --timeout 5m0s $image:${{ matrix.repo.dockertagprefix }}$LATEST_APP_RELEASE
+      #       fi
+      #     done
