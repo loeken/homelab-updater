@@ -33,7 +33,7 @@ externaldns:
   enabled: false
 githubRepo: homelab-example
 githubUser: loeken
-ha:
+home-assistant:
   chartVersion: 2023.8.2
   enabled: false
   ingress:
