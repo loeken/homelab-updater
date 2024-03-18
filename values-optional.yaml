@@ -148,7 +148,7 @@ nzbget:
   storageClass: local-path
   useAuthelia: false
 prowlarr:
-  chartVersion: 1.13.3
+  chartVersion: 1.14.3
   enabled: false
   ingress:
     cloudflaretunnel:
