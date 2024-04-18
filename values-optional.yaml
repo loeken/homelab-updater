@@ -61,7 +61,7 @@ jellyfin:
       enabled: false
   useAuthelia: false
 jellyseerr:
-  chartVersion: 1.7.0
+  chartVersion: 1.8.1
   enabled: false
   ingress:
     cloudflaretunnel:
