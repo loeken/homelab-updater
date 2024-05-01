@@ -111,7 +111,7 @@ loki:
   storageClass: local-path
   storageSize: 10Gi
 nextcloud:
-  chartVersion: 4.6.7
+  chartVersion: 4.6.8
   data:
     size: 10Gi
     storageClass: local-path
