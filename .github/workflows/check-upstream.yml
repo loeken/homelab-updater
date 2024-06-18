@@ -215,7 +215,7 @@ jobs:
           
           - chartName: rtorrent-flood
             chartType: optional
-            valuesChartName: rtorrentflood
+            valuesChartName: rtorrent
             github_user: jesec
             github_repo: flood
             self_managed_image: 'true'
