@@ -187,7 +187,7 @@ sharedmedia:
   size: 100Gi
   storageClass: nfs-client
 sonarr:
-  chartVersion: 4.0.4
+  chartVersion: 4.0.5
   enabled: false
   ingress:
     cloudflaretunnel:
