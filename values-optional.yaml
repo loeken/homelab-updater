@@ -212,7 +212,7 @@ vaultwarden:
 volumesnapshots:
   enabled: true
 whoami:
-  chartVersion: 5.1.0
+  chartVersion: 5.1.1
   enabled: true
   ingress:
     cloudflaretunnel:
