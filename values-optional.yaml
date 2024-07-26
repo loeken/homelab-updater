@@ -172,7 +172,7 @@ radarr:
 robusta:
   enabled: false
 rtorrentflood:
-  chartVersion: 4.7.0
+  chartVersion: 4.8.2
   enabled: false
   ingress:
     cloudflaretunnel:
