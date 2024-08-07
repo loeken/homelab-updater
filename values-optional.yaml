@@ -1,5 +1,5 @@
 authelia:
-  chartVersion: 0.9.2
+  chartVersion: 0.9.3
   enabled: false
   filesystem:
     enabled: true
@@ -16,7 +16,7 @@ authelia:
     username: authelia@example.com
   storageClass: local-path
 certmanager:
-  chartVersion: 1.15.1
+  chartVersion: 1.15.2
   enabled: false
 cloudflaretunnel:
   enabled: false
@@ -29,7 +29,7 @@ democratic_nfs:
   enabled: false
 domain: example.com
 externaldns:
-  chartVersion: 8.3.3
+  chartVersion: 8.3.4
   enabled: false
 githubRepo: homelab-example
 githubUser: loeken
@@ -111,7 +111,7 @@ loki:
   storageClass: local-path
   storageSize: 10Gi
 nextcloud:
-  chartVersion: 5.3.2
+  chartVersion: 5.5.2
   data:
     size: 10Gi
     storageClass: local-path
