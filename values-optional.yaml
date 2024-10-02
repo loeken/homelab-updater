@@ -1,5 +1,5 @@
 authelia:
-  chartVersion: 0.9.5
+  chartVersion: 0.9.8
   enabled: false
   filesystem:
     enabled: true
