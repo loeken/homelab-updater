@@ -97,41 +97,41 @@ jobs:
             dockertagprefix: ""
             remote_chart_name: jellyseer
 
-          - chartName: k10
-            chartType: optional
-            valuesChartName: k10
-            github_user: kasten-io
-            github_repo: k10
-            self_managed_image: 'true'
-            self_managed_chart: 'true'
-            images:
-              - gcr.io/kasten-images/init
-              - gcr.io/kasten-images/grafana
-              - gcr.io/kasten-images/configmap-reload
-              - gcr.io/kasten-images/prometheus
-              - gcr.io/kasten-images/auth
-              - gcr.io/kasten-images/upgrade
-              - gcr.io/kasten-images/catalog
-              # - ghcr.io/kanisterio/kanister-tools
-              - gcr.io/kasten-images/controllermanager
-              - gcr.io/kasten-images/crypto
-              - gcr.io/kasten-images/events
-              - gcr.io/kasten-images/garbagecollector
-              - gcr.io/kasten-images/bloblifecyclemanager
-              - gcr.io/kasten-images/vbrintegrationapi
-              - gcr.io/kasten-images/executor
-              - gcr.io/kasten-images/cephtool
-              - gcr.io/kasten-images/jobs
-              - gcr.io/kasten-images/logging
-              - gcr.io/kasten-images/metering
-              - gcr.io/kasten-images/state
-              - gcr.io/kasten-images/admin
-              - gcr.io/kasten-images/aggregatedapis
-              - gcr.io/kasten-images/frontend
-              - gcr.io/kasten-images/kanister
-              - gcr.io/kasten-images/emissary
-            chart_index_url: https://charts.kasten.io/index.yaml
-            dockertagprefix: ""
+          #- chartName: k10
+          #  chartType: optional
+          #  valuesChartName: k10
+          #  github_user: kasten-io
+          #  github_repo: k10
+          #  self_managed_image: 'true'
+          #  self_managed_chart: 'true'
+          #  images:
+          #    - gcr.io/kasten-images/init
+          #    - gcr.io/kasten-images/grafana
+          #    - gcr.io/kasten-images/configmap-reload
+          #    - gcr.io/kasten-images/prometheus
+          #    - gcr.io/kasten-images/auth
+          #    - gcr.io/kasten-images/upgrade
+          #    - gcr.io/kasten-images/catalog
+          #    # - ghcr.io/kanisterio/kanister-tools
+          #    - gcr.io/kasten-images/controllermanager
+          #    - gcr.io/kasten-images/crypto
+          #    - gcr.io/kasten-images/events
+          #    - gcr.io/kasten-images/garbagecollector
+          #    - gcr.io/kasten-images/bloblifecyclemanager
+          #    - gcr.io/kasten-images/vbrintegrationapi
+          #    - gcr.io/kasten-images/executor
+          #    - gcr.io/kasten-images/cephtool
+          #    - gcr.io/kasten-images/jobs
+          #    - gcr.io/kasten-images/logging
+          #    - gcr.io/kasten-images/metering
+          #    - gcr.io/kasten-images/state
+          #    - gcr.io/kasten-images/admin
+          #    - gcr.io/kasten-images/aggregatedapis
+          #    - gcr.io/kasten-images/frontend
+          #    - gcr.io/kasten-images/kanister
+          #    - gcr.io/kasten-images/emissary
+          #  chart_index_url: https://charts.kasten.io/index.yaml
+          #  dockertagprefix: ""
 
           - chartName: loki-stack
             chartType: optional
