@@ -199,7 +199,7 @@ sonarr:
   useAuthelia: false
 storageClass: local-path
 vaultwarden:
-  chartVersion: 1.32.7
+  chartVersion: 1.33.1
   enabled: false
   ingress:
     cloudflaretunnel:
